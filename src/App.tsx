@@ -2,7 +2,11 @@
 import React, { useState } from 'react';
 import './App.css';
 
-const weeks = [
+type Week =
+  | { week: number; type: 'base' | 'deload'; percent: number; reps: string }
+  | { week: number; type: 'wave'; percents: number[]; reps: string[] };
+
+const weeks: Week[] = [
   { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
   { week: 2, type: 'base', percent: 0.75, reps: '4x5' },
   { week: 3, type: 'base', percent: 0.8, reps: '4x4' },
@@ -13,8 +17,8 @@ const weeks = [
   { week: 8, type: 'deload', percent: 0.6, reps: '3x5' },
 ];
 
-const App = () => {
-  const [oneRepMax, setOneRepMax] = useState({
+const App: React.FC = () => {
+  const [oneRepMax, setOneRepMax] = useState<Record<string, number>>({
     squat: 0,
     bench: 0,
     deadlift: 0,
@@ -23,53 +27,39 @@ const App = () => {
     snatch: 0,
   });
 
-  const [currentWeek, setCurrentWeek] = useState(0);
+  const [currentWeek, setCurrentWeek] = useState<number>(0);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { id, value } = e.target;
     setOneRepMax({ ...oneRepMax, [id]: parseInt(value) || 0 });
   };
 
-  const calculateWeight = (percent: number, lift: keyof typeof oneRepMax) => {
+  const calculateWeight = (percent: number, lift: string): string => {
     return `${Math.round(oneRepMax[lift] * percent)} lbs @ ${percent * 100}%`;
   };
 
-  const renderLift = (name: string, liftKey: keyof typeof oneRepMax) => {
+  const renderLift = (name: string, liftKey: string) => {
     const week = weeks[currentWeek];
 
-    if (
-      week.type === 'wave' &&
-      Array.isArray((week as any).percents) &&
-      Array.isArray((week as any).reps)
-    ) {
-      const percents = (week as any).percents as number[];
-      const reps = (week as any).reps as string[];
+    if (week.type === 'wave') {
       return (
         <div className="form-group">
           <label>{name} – Wave Week</label>
           <ul>
-            {percents.map((p, i) => (
-              <li key={i}>{reps[i]}: {calculateWeight(p, liftKey)}</li>
+            {week.percents.map((p, i) => (
+              <li key={i}>{week.reps[i]} – {calculateWeight(p, liftKey)}</li>
             ))}
           </ul>
         </div>
       );
     }
 
-    if (typeof week.percent === 'number') {
-      const backoffPercent = week.percent - 0.05;
-      return (
-        <div className="form-group">
-          <label>{name} – {week.reps} @ {week.percent * 100}%</label>
-          <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
-          <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {Math.round(oneRepMax[liftKey] * backoffPercent)} lbs</p>
-        </div>
-      );
-    }
-
+    const backoffPercent = week.percent - 0.05;
     return (
       <div className="form-group">
-        <label>{name} – Data not available for this week</label>
+        <label>{name} – {week.reps} @ {week.percent * 100}%</label>
+        <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
+        <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {calculateWeight(backoffPercent, liftKey)}</p>
       </div>
     );
   };
