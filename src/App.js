@@ -1,5 +1,10 @@
-// Strength Program App (Clean UI + Daily View + Clickable Calendar with Phases + Dynamic Accessory Work)
+// Strength Program App (Visual Refresh with ShadCN + Tailwind Enhancements)
 import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { BadgeCheck, Dumbbell } from 'lucide-react';
 import './index.css';
 
 const weeks = Array.from({ length: 8 }, (_, i) => i + 1);
@@ -19,33 +24,33 @@ const OLY_PERCENTAGES = [0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.85];
 
 const getAccessoryWork = (week, dayIdx) => {
   const upper = [
-  "Push-ups: 3x20",
-  "Chin-ups: 3xMax",
-  "Dumbbell Bench Press: 3x12",
-  "Arnold Press: 3x10",
-  "Bent-over Rows (Barbell): 3x10"
-];
+    "Push-ups: 3x20",
+    "Chin-ups: 3xMax",
+    "Dumbbell Bench Press: 3x12",
+    "Arnold Press: 3x10",
+    "Bent-over Rows (Barbell): 3x10"
+  ];
   const lower = [
-  "Goblet Squats: 3x15",
-  "Walking Lunges: 3x12 each leg",
-  "Bulgarian Split Squat: 3x8",
-  "Dumbbell Step-ups: 3x10 each leg",
-  "Barbell Hip Thrusts: 3x12"
-];
+    "Goblet Squats: 3x15",
+    "Walking Lunges: 3x12 each leg",
+    "Bulgarian Split Squat: 3x8",
+    "Dumbbell Step-ups: 3x10 each leg",
+    "Barbell Hip Thrusts: 3x12"
+  ];
   const core = [
-  "Plank: 3x30s",
-  "V-ups: 3x15",
-  "Hanging Knee Raises: 3x12",
-  "Russian Twists (plate): 3x20",
-  "Barbell Rollouts: 3x10"
-];
+    "Plank: 3x30s",
+    "V-ups: 3x15",
+    "Hanging Knee Raises: 3x12",
+    "Russian Twists (plate): 3x20",
+    "Barbell Rollouts: 3x10"
+  ];
   const cardio = [
-  "Jump Rope: 3x1min",
-  "Burpees: 3x10",
-  "Mountain Climbers: 3x30s",
-  "Jump Squats: 3x12",
-  "Farmer's Carry (Dumbbells): 3x40ft"
-];
+    "Jump Rope: 3x1min",
+    "Burpees: 3x10",
+    "Mountain Climbers: 3x30s",
+    "Jump Squats: 3x12",
+    "Farmer's Carry (Dumbbells): 3x40ft"
+  ];
 
   const groups = [upper, lower, core, cardio];
   const seed = (week * 3 + dayIdx) % groups.length;
@@ -98,6 +103,8 @@ export default function StrengthApp() {
     setLoading(false);
   };
 
+  const weeks = Array.from({ length: 8 }, (_, i) => i + 1);
+  const days = ["Day 1", "Day 2", "Day 3"];
   const currentWeek = weeks[weekIdx];
   const currentDay = days[dayIdx];
   const liftOrder = ["squat", "bench", "deadlift"];
@@ -132,10 +139,10 @@ export default function StrengthApp() {
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto space-y-6">
-      <div className="card">
-        <div className="card-content">
-          <h3 className="text-md font-semibold">Progress Calendar</h3>
+    <div className="p-4 max-w-3xl mx-auto space-y-6">
+      <Card>
+        <CardHeader className="text-xl font-bold">Progress Calendar</CardHeader>
+        <CardContent>
           <div className="grid grid-cols-3 gap-2">
             {weeks.map(w => (
               <div key={w} className="border rounded p-2">
@@ -158,29 +165,30 @@ export default function StrengthApp() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="card">
-        <div className="card-content">
-          <h2 className="text-xl font-semibold mb-2">Enter Your 1RMs</h2>
+      <Card>
+        <CardHeader className="text-xl font-semibold">Enter Your 1RMs</CardHeader>
+        <CardContent className="grid gap-3">
           {LIFT_INPUTS.map(({ key, label }) => (
-            <div key={key} className="mb-2">
-              <label className="block text-sm font-medium">{label}</label>
-              <input
+            <div key={key} className="grid gap-1">
+              <label className="text-sm font-medium">{label}</label>
+              <Input
                 type="number"
                 value={rms[key] || ''}
                 onChange={e => updateRM(key, e.target.value)}
-                className="input"
               />
             </div>
           ))}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="card">
-        <div className="card-content space-y-2">
-          <h3 className="text-lg font-semibold">Week {currentWeek} – {currentDay}</h3>
+      <Card>
+        <CardHeader className="text-xl font-semibold flex items-center gap-2">
+          <Dumbbell className="w-5 h-5" /> Week {currentWeek} – {currentDay}
+        </CardHeader>
+        <CardContent className="space-y-2">
           <p><strong>Main Lift:</strong> {mainLift.toUpperCase()}</p>
           {currentWeek === WAVE_SET_WEEK ? (
             <p><strong>Wave Set Weights:</strong> {
@@ -195,42 +203,39 @@ export default function StrengthApp() {
           {olympicLift && (
             <p><strong>{olympicLift.toUpperCase()}:</strong> {formatWeight(OLY_PERCENTAGES[currentWeek - 1], olympicRM)} lbs</p>
           )}
-
-          <p><strong>Accessory Work:</strong></p>
-          <ul className="list-disc list-inside">
-            {accessories.map((work, i) => <li key={i}>{work}</li>)}
-          </ul>
-
-          <textarea
+          <div>
+            <p className="font-semibold mt-4">Accessory Work</p>
+            <ul className="list-disc list-inside text-sm">
+              {accessories.map((work, i) => <li key={i}>{work}</li>)}
+            </ul>
+          </div>
+          <Textarea
             placeholder="Notes / RPE / Reps Completed"
             value={log[`${currentWeek}-${currentDay}`] || ''}
             onChange={e => setLog({ ...log, [`${currentWeek}-${currentDay}`]: e.target.value })}
-            className="textarea w-full mt-2"
           />
+          <Button onClick={nextDay} className="mt-2 w-full">
+            <BadgeCheck className="mr-2 h-4 w-4" /> Mark Day as Completed
+          </Button>
+        </CardContent>
+      </Card>
 
-          <button className="btn mt-4" onClick={nextDay}>
-            Mark Day as Completed ➡️
-          </button>
-        </div>
-      </div>
-
-      <div className="card mt-6">
-        <div className="card-content space-y-2">
-          <h3 className="text-lg font-semibold">AI Assistant</h3>
-          <textarea
+      <Card>
+        <CardHeader className="text-xl font-semibold">AI Assistant</CardHeader>
+        <CardContent className="space-y-2">
+          <Textarea
             placeholder="Ask to generate a plan or modify a week..."
-            className="textarea w-full"
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
           />
-          <button className="btn" onClick={runAssistant} disabled={loading}>
+          <Button onClick={runAssistant} disabled={loading}>
             {loading ? "Thinking..." : "Generate Plan or Advice"}
-          </button>
+          </Button>
           {response && (
-            <pre className="bg-gray-100 p-2 rounded whitespace-pre-wrap">{response}</pre>
+            <pre className="bg-muted p-3 rounded text-sm whitespace-pre-wrap">{response}</pre>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
