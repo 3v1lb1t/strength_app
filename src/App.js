@@ -1,9 +1,9 @@
 // Strength Program App (Visual Refresh with ShadCN + Tailwind Enhancements)
 import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Textarea } from "../components/ui/textarea";
+import { Input } from "../components/ui/input";
 import { BadgeCheck, Dumbbell } from 'lucide-react';
 import './index.css';
 
