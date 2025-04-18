@@ -1,4 +1,4 @@
-// Strength Program App (Clean UI + Daily View + Clickable Calendar with Phases)
+// Strength Program App (Clean UI + Daily View + Clickable Calendar with Phases + Dynamic Accessory Work)
 import React, { useState } from 'react';
 import './index.css';
 
@@ -16,13 +16,49 @@ const LIFT_INPUTS = [
 const WAVE_SET_WEEK = 5;
 const WAVE_SETS = [75, 77, 84, 87, 80, 75];
 const OLY_PERCENTAGES = [0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.85];
-const ACCESSORY_WORK = [
-  "Pull-ups: 3x10",
-  "Renegade Rows: 3x12",
-  "Overhead Plate Lunge: 3x10 each leg",
-  "Russian Twists: 3x30sec",
-  "Dumbbell RDLs: 3x10"
+
+const getAccessoryWork = (week, dayIdx) => {
+  const upper = [
+  "Push-ups: 3x20",
+  "Chin-ups: 3xMax",
+  "Dumbbell Bench Press: 3x12",
+  "Arnold Press: 3x10",
+  "Bent-over Rows (Barbell): 3x10"
 ];
+  const lower = [
+  "Goblet Squats: 3x15",
+  "Walking Lunges: 3x12 each leg",
+  "Bulgarian Split Squat: 3x8",
+  "Dumbbell Step-ups: 3x10 each leg",
+  "Barbell Hip Thrusts: 3x12"
+];
+  const core = [
+  "Plank: 3x30s",
+  "V-ups: 3x15",
+  "Hanging Knee Raises: 3x12",
+  "Russian Twists (plate): 3x20",
+  "Barbell Rollouts: 3x10"
+];
+  const cardio = [
+  "Jump Rope: 3x1min",
+  "Burpees: 3x10",
+  "Mountain Climbers: 3x30s",
+  "Jump Squats: 3x12",
+  "Farmer's Carry (Dumbbells): 3x40ft"
+];
+
+  const groups = [upper, lower, core, cardio];
+  const seed = (week * 3 + dayIdx) % groups.length;
+  const accessories = [];
+
+  for (let i = 0; i < 2; i++) {
+    const group = groups[(seed + i) % groups.length];
+    const exercise = group[(week + dayIdx + i * 3) % group.length];
+    accessories.push(exercise);
+  }
+
+  return accessories;
+};
 
 export default function StrengthApp() {
   const [rms, setRms] = useState({ squat: 315, bench: 225, deadlift: 365, clean: 185, snatch: 135 });
@@ -69,6 +105,7 @@ export default function StrengthApp() {
   const mainRM = rms[mainLift];
   const olympicLift = dayIdx === 0 ? "clean" : dayIdx === 1 ? "snatch" : null;
   const olympicRM = olympicLift ? rms[olympicLift] : 0;
+  const accessories = getAccessoryWork(currentWeek, dayIdx);
 
   const handleCalendarClick = (w, d) => {
     setWeekIdx(w - 1);
@@ -87,11 +124,11 @@ export default function StrengthApp() {
   };
 
   const getPhaseColor = (week) => {
-    if (week < 3) return 'bg-blue-200'; // Base
-    if (week < 5) return 'bg-yellow-200'; // Build
-    if (week === 5) return 'bg-orange-200'; // Wave
-    if (week < 8) return 'bg-red-200'; // Peak
-    return 'bg-green-200'; // Test
+    if (week < 3) return 'bg-blue-200';
+    if (week < 5) return 'bg-yellow-200';
+    if (week === 5) return 'bg-orange-200';
+    if (week < 8) return 'bg-red-200';
+    return 'bg-green-200';
   };
 
   return (
@@ -161,7 +198,7 @@ export default function StrengthApp() {
 
           <p><strong>Accessory Work:</strong></p>
           <ul className="list-disc list-inside">
-            {ACCESSORY_WORK.map((work, i) => <li key={i}>{work}</li>)}
+            {accessories.map((work, i) => <li key={i}>{work}</li>)}
           </ul>
 
           <textarea
