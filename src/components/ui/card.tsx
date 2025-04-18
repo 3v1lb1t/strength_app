@@ -1,11 +1,11 @@
 import * as React from "react";
 
 export const Card = ({ className = "", ...props }) => (
-  <div className={`rounded-lg border bg-white text-black shadow-sm ${className}`} {...props} />
+  <div className={`rounded-lg border bg-gray-900 text-white border-gray-700 shadow-sm ${className}`} {...props} />
 );
 
 export const CardHeader = ({ className = "", ...props }) => (
-  <div className={`px-6 py-4 border-b text-lg font-semibold ${className}`} {...props} />
+  <div className={`px-6 py-4 border-b border-gray-700 text-lg font-semibold ${className}`} {...props} />
 );
 
 export const CardContent = ({ className = "", ...props }) => (
