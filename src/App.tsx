@@ -1,152 +1,84 @@
 // src/App.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 const App = () => {
+  const [oneRepMax, setOneRepMax] = useState({
+    squat: 0,
+    bench: 0,
+    deadlift: 0,
+    press: 0,
+    clean: 0,
+    snatch: 0,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setOneRepMax({ ...oneRepMax, [id]: parseInt(value) || 0 });
+  };
+
+  const calculateWeight = (percent: number, lift: keyof typeof oneRepMax) => {
+    return `${Math.round(oneRepMax[lift] * percent)} lbs (${percent * 100}%)`;
+  };
+
   return (
     <div className="app-container">
-      <h1 className="app-title">Dark Themed React Template (No Tailwind)</h1>
+      <h1 className="app-title">Strength App: Dynamic Program Generator</h1>
       <div className="form-wrapper">
         <form className="form">
+          <h2>Enter Your 1 Rep Max</h2>
           <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              id="name"
-              type="text"
-              placeholder="Enter your name"
-            />
+            <label htmlFor="squat">Squat 1RM</label>
+            <input id="squat" type="number" onChange={handleChange} placeholder="e.g., 315" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="bench">Bench Press 1RM</label>
+            <input id="bench" type="number" onChange={handleChange} placeholder="e.g., 225" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="deadlift">Deadlift 1RM</label>
+            <input id="deadlift" type="number" onChange={handleChange} placeholder="e.g., 405" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="press">Overhead Press 1RM</label>
+            <input id="press" type="number" onChange={handleChange} placeholder="e.g., 135" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="clean">Clean & Jerk 1RM</label>
+            <input id="clean" type="number" onChange={handleChange} placeholder="e.g., 205" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="snatch">Snatch 1RM</label>
+            <input id="snatch" type="number" onChange={handleChange} placeholder="e.g., 155" />
           </div>
 
+          <h2>Example Week - Auto Generated Loads</h2>
           <div className="form-group">
-            <label htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              placeholder="Write something..."
-            />
+            <label>Squat (3x5 @ 75%)</label>
+            <p>{calculateWeight(0.75, 'squat')}</p>
+          </div>
+          <div className="form-group">
+            <label>Bench Press (4x6 @ 70%)</label>
+            <p>{calculateWeight(0.7, 'bench')}</p>
+          </div>
+          <div className="form-group">
+            <label>Deadlift (4x3 @ 85%)</label>
+            <p>{calculateWeight(0.85, 'deadlift')}</p>
+          </div>
+          <div className="form-group">
+            <label>Overhead Press (3x8 @ 65%)</label>
+            <p>{calculateWeight(0.65, 'press')}</p>
+          </div>
+          <div className="form-group">
+            <label>Clean and Jerk (3x2 @ 75%)</label>
+            <p>{calculateWeight(0.75, 'clean')}</p>
+          </div>
+          <div className="form-group">
+            <label>Snatch (4x2 @ 70%)</label>
+            <p>{calculateWeight(0.7, 'snatch')}</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="squat">Back Squat</label>
-            <input
-              id="squat"
-              type="text"
-              placeholder="e.g., 5 sets of 3 reps at 80%"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="bench">Bench Press</label>
-            <input
-              id="bench"
-              type="text"
-              placeholder="e.g., 4 sets of 5 reps at 75%"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="deadlift">Deadlift</label>
-            <input
-              id="deadlift"
-              type="text"
-              placeholder="e.g., 3 sets of 4 reps at 85%"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="press">Overhead Press</label>
-            <input
-              id="press"
-              type="text"
-              placeholder="e.g., 5 sets of 2 reps at 90%"
-            />
-          </div>
-
-          <h2 className="accessory-title">Accessory Work</h2>
-
-          <div className="form-group">
-            <label htmlFor="overhead-squat">Overhead Squat</label>
-            <input
-              id="overhead-squat"
-              type="text"
-              placeholder="e.g., 3 sets of 6 reps at 60%"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="plate-lunge">Plate Overhead Lunge</label>
-            <input
-              id="plate-lunge"
-              type="text"
-              placeholder="e.g., 2 rounds of 10 steps each leg"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="clean-jerk">Clean and Jerk</label>
-            <input
-              id="clean-jerk"
-              type="text"
-              placeholder="e.g., 4 sets of 2 reps at 70%"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="burpee-row">Burpee to Renegade Row</label>
-            <input
-              id="burpee-row"
-              type="text"
-              placeholder="e.g., 3 rounds of 10 reps"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="pullups">Pull-ups</label>
-            <input
-              id="pullups"
-              type="text"
-              placeholder="e.g., 3 sets to failure"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="renegade-rows">Renegade Rows</label>
-            <input
-              id="renegade-rows"
-              type="text"
-              placeholder="e.g., 3 sets of 10 reps"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="russian-twists">Russian Twists</label>
-            <input
-              id="russian-twists"
-              type="text"
-              placeholder="e.g., 3 rounds of 20 reps (10 each side)"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="db-curls">Dumbbell Curls</label>
-            <input
-              id="db-curls"
-              type="text"
-              placeholder="e.g., 4 sets of 12 reps"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="bodyweight-dips">Bodyweight Dips</label>
-            <input
-              id="bodyweight-dips"
-              type="text"
-              placeholder="e.g., 3 sets to failure"
-            />
-          </div>
-
-          <button type="submit" className="submit-button">
-            Submit
-          </button>
+          <button type="submit" className="submit-button">Generate Full Program</button>
         </form>
       </div>
     </div>
