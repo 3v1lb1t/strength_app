@@ -66,7 +66,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <h1 className="app-title">Strength App: Week {weeks[currentWeek].week} - {weeks[currentWeek].type.toUpperCase()}</h1>
+      <h1 className="app-title">Strength App: Day {currentWeek + 1}</h1>
       <div className="form-wrapper">
         <form className="form">
           <h2>Enter Your 1 Rep Max</h2>
