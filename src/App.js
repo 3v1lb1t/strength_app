@@ -1,4 +1,4 @@
-// Strength Program App (Clean UI + Daily View + Calendar)
+// Strength Program App (Clean UI + Daily View + Clickable Calendar with Phases)
 import React, { useState } from 'react';
 import './index.css';
 
@@ -70,6 +70,11 @@ export default function StrengthApp() {
   const olympicLift = dayIdx === 0 ? "clean" : dayIdx === 1 ? "snatch" : null;
   const olympicRM = olympicLift ? rms[olympicLift] : 0;
 
+  const handleCalendarClick = (w, d) => {
+    setWeekIdx(w - 1);
+    setDayIdx(d);
+  };
+
   const nextDay = () => {
     const key = `${currentWeek}-${currentDay}`;
     setCompletedDays([...completedDays, key]);
@@ -81,8 +86,44 @@ export default function StrengthApp() {
     }
   };
 
+  const getPhaseColor = (week) => {
+    if (week < 3) return 'bg-blue-200'; // Base
+    if (week < 5) return 'bg-yellow-200'; // Build
+    if (week === 5) return 'bg-orange-200'; // Wave
+    if (week < 8) return 'bg-red-200'; // Peak
+    return 'bg-green-200'; // Test
+  };
+
   return (
     <div className="p-4 max-w-xl mx-auto space-y-6">
+      <div className="card">
+        <div className="card-content">
+          <h3 className="text-md font-semibold">Progress Calendar</h3>
+          <div className="grid grid-cols-3 gap-2">
+            {weeks.map(w => (
+              <div key={w} className="border rounded p-2">
+                <div className="font-semibold mb-1">Week {w}</div>
+                <div className="flex flex-col gap-1">
+                  {days.map((d, i) => {
+                    const key = `${w}-${d}`;
+                    const complete = completedDays.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        className={`text-sm p-1 rounded ${getPhaseColor(w)} ${complete ? 'border border-green-600' : ''}`}
+                        onClick={() => handleCalendarClick(w, i)}
+                      >
+                        {d}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="card">
         <div className="card-content">
           <h2 className="text-xl font-semibold mb-2">Enter Your 1RMs</h2>
@@ -133,31 +174,6 @@ export default function StrengthApp() {
           <button className="btn mt-4" onClick={nextDay}>
             Mark Day as Completed ➡️
           </button>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-content">
-          <h3 className="text-md font-semibold">Progress Calendar</h3>
-          <div className="grid grid-cols-4 gap-2">
-            {weeks.map(w => (
-              <div key={w}>
-                <div className="font-semibold">Week {w}</div>
-                {days.map(d => {
-                  const key = `${w}-${d}`;
-                  const complete = completedDays.includes(key);
-                  return (
-                    <div
-                      key={key}
-                      className={`text-sm px-2 py-1 rounded ${complete ? 'bg-green-300' : 'bg-gray-200'}`}
-                    >
-                      {d}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
