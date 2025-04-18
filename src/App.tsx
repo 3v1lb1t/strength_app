@@ -2,6 +2,17 @@
 import React, { useState } from 'react';
 import './App.css';
 
+const weeks = [
+  { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
+  { week: 2, type: 'base', percent: 0.75, reps: '4x5' },
+  { week: 3, type: 'base', percent: 0.8, reps: '4x4' },
+  { week: 4, type: 'wave', percents: [0.75, 0.77, 0.84, 0.87, 0.80, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
+  { week: 5, type: 'base', percent: 0.82, reps: '3x3' },
+  { week: 6, type: 'wave', percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] },
+  { week: 7, type: 'base', percent: 0.85, reps: '3x2' },
+  { week: 8, type: 'deload', percent: 0.6, reps: '3x5' },
+];
+
 const App = () => {
   const [oneRepMax, setOneRepMax] = useState({
     squat: 0,
@@ -11,6 +22,7 @@ const App = () => {
     clean: 0,
     snatch: 0,
   });
+  const [currentWeek, setCurrentWeek] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -18,113 +30,77 @@ const App = () => {
   };
 
   const calculateWeight = (percent: number, lift: keyof typeof oneRepMax) => {
-    return `${Math.round(oneRepMax[lift] * percent)} lbs (${percent * 100}%)`;
+    return `${Math.round(oneRepMax[lift] * percent)} lbs @ ${percent * 100}%`;
+  };
+
+  const renderLift = (name: string, liftKey: keyof typeof oneRepMax) => {
+    const week = weeks[currentWeek];
+    if (
+      week.type === 'wave' &&
+      Array.isArray((week as any).percents) &&
+      Array.isArray((week as any).reps)
+    ) {
+      return (
+        <div className="form-group">
+          <label>{name} (Wave Week)</label>
+          {(week as any).percents.map((p: number, i: number) => (
+            <p key={i}>{(week as any).reps[i]} – {calculateWeight(p, liftKey)}</p>
+          ))}
+        </div>
+      );
+    } else {
+      if (typeof week.percent === 'number') {
+      return (
+        <div className="form-group">
+          <label>{name} ({week.reps} @ {week.percent * 100}%)</label>
+          <p>{calculateWeight(week.percent, liftKey)}</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="form-group">
+          <label>{name} – Data not available for this week</label>
+        </div>
+      );
+    }
+    }
   };
 
   return (
     <div className="app-container">
-      <h1 className="app-title">Strength App: Dynamic Program Generator</h1>
+      <h1 className="app-title">Strength App: Week {weeks[currentWeek].week} - {weeks[currentWeek].type.toUpperCase()}</h1>
       <div className="form-wrapper">
         <form className="form">
           <h2>Enter Your 1 Rep Max</h2>
-          <div className="form-group">
-            <label htmlFor="squat">Squat 1RM</label>
-            <input id="squat" type="number" onChange={handleChange} placeholder="e.g., 315" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="bench">Bench Press 1RM</label>
-            <input id="bench" type="number" onChange={handleChange} placeholder="e.g., 225" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="deadlift">Deadlift 1RM</label>
-            <input id="deadlift" type="number" onChange={handleChange} placeholder="e.g., 405" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="press">Overhead Press 1RM</label>
-            <input id="press" type="number" onChange={handleChange} placeholder="e.g., 135" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="clean">Clean & Jerk 1RM</label>
-            <input id="clean" type="number" onChange={handleChange} placeholder="e.g., 205" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="snatch">Snatch 1RM</label>
-            <input id="snatch" type="number" onChange={handleChange} placeholder="e.g., 155" />
-          </div>
+          {Object.keys(oneRepMax).map((key) => (
+            <div className="form-group" key={key}>
+              <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)} 1RM</label>
+              <input id={key} type="number" onChange={handleChange} placeholder={`e.g., ${key === 'snatch' ? 155 : 225}`}/>
+            </div>
+          ))}
 
-          <h2>Main and Olympic Lifts - Auto Generated Loads</h2>
-          <div className="form-group">
-            <label>Squat (Wave: 1x7@75%, 1x5@77%, 1x3@84%, 1x3@87%, 1x5@80%, 1x7@75%)</label>
-            <p>{calculateWeight(0.75, 'squat')}, {calculateWeight(0.77, 'squat')}, {calculateWeight(0.84, 'squat')}, {calculateWeight(0.87, 'squat')}, {calculateWeight(0.80, 'squat')}, {calculateWeight(0.75, 'squat')}</p>
-          </div>
-          <div className="form-group">
-            <label>Bench Press (4x6 @ 70%)</label>
-            <p>{calculateWeight(0.7, 'bench')}</p>
-          </div>
-          <div className="form-group">
-            <label>Deadlift (4x3 @ 85%)</label>
-            <p>{calculateWeight(0.85, 'deadlift')}</p>
-          </div>
-          <div className="form-group">
-            <label>Overhead Press (3x8 @ 65%)</label>
-            <p>{calculateWeight(0.65, 'press')}</p>
-          </div>
-          <div className="form-group">
-            <label>Clean and Jerk (3x2 @ 75%)</label>
-            <p>{calculateWeight(0.75, 'clean')}</p>
-          </div>
-          <div className="form-group">
-            <label>Power Clean (3x3 @ 70%)</label>
-            <p>{calculateWeight(0.7, 'clean')}</p>
-          </div>
-          <div className="form-group">
-            <label>Squat Clean (3x2 @ 80%)</label>
-            <p>{calculateWeight(0.8, 'clean')}</p>
-          </div>
-          <div className="form-group">
-            <label>Power Snatch (4x3 @ 65%)</label>
-            <p>{calculateWeight(0.65, 'snatch')}</p>
-          </div>
-          <div className="form-group">
-            <label>Squat Snatch (3x2 @ 75%)</label>
-            <p>{calculateWeight(0.75, 'snatch')}</p>
-          </div>
+          <h2>Main & Olympic Lifts</h2>
+          {renderLift('Squat', 'squat')}
+          {renderLift('Bench Press', 'bench')}
+          {renderLift('Deadlift', 'deadlift')}
+          {renderLift('Overhead Press', 'press')}
+          {renderLift('Clean & Jerk', 'clean')}
+          {renderLift('Snatch', 'snatch')}
 
-          <h2>Accessory Work (Fixed Reps & Weight Guidance)</h2>
-          <div className="form-group">
-            <label>Pull-ups</label>
-            <p>3 sets to failure, bodyweight</p>
-          </div>
-          <div className="form-group">
-            <label>Renegade Rows</label>
-            <p>3 sets of 10 reps, moderate dumbbells</p>
-          </div>
-          <div className="form-group">
-            <label>Russian Twists</label>
-            <p>3 sets of 20 reps, light plate or med ball</p>
-          </div>
-          <div className="form-group">
-            <label>Dumbbell Curls</label>
-            <p>4 sets of 12 reps, moderate dumbbells</p>
-          </div>
-          <div className="form-group">
-            <label>Bodyweight Dips</label>
-            <p>3 sets to failure</p>
-          </div>
-          <div className="form-group">
-            <label>Burpee to Renegade Row</label>
-            <p>3 rounds of 10 reps, light dumbbells</p>
-          </div>
-          <div className="form-group">
-            <label>Plate Overhead Lunge</label>
-            <p>2 rounds of 10 steps per leg, 25-45 lb plate</p>
-          </div>
-          <div className="form-group">
-            <label>Overhead Squat</label>
-            <p>3 rounds of 6 at moderate weight</p>
-          </div>
+          <h2>Accessory Work</h2>
+          <ul>
+            <li>Pull-ups – 3 sets to failure</li>
+            <li>Renegade Rows – 3x10 reps (moderate DB)</li>
+            <li>Russian Twists – 3x20 reps (light plate)</li>
+            <li>Dumbbell Curls – 4x12 reps</li>
+            <li>Bodyweight Dips – 3 sets to failure</li>
+            <li>Burpee to Renegade Row – 3x10 reps</li>
+            <li>Plate Overhead Lunge – 2x10 steps/leg</li>
+          </ul>
 
-          <button type="submit" className="submit-button">Generate Full Program</button>
+          <button type="button" className="submit-button" onClick={() => setCurrentWeek((prev) => (prev + 1) % weeks.length)}>
+            Next Week
+          </button>
         </form>
       </div>
     </div>
