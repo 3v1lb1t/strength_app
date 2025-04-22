@@ -2,7 +2,7 @@
   "name": "strength-program-app",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://3v1lb1t.github.io/strength_app",
+  "homepage": ".",
   "dependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

@@ -1,6 +1,5 @@
-// src/App.tsx
-import React, { useState } from 'react';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import './app.css';
 
 type Week =
   | { week: number; type: 'base' | 'deload'; percent: number; reps: string }
@@ -63,6 +62,27 @@ const App: React.FC = () => {
   });
 
   const [currentDay, setCurrentDay] = useState<number>(0);
+  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = () => {
+    if (!deferredPrompt) return;
+    (deferredPrompt as any).prompt();
+    (deferredPrompt as any).userChoice.then(() => {
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { id, value } = e.target;
@@ -100,14 +120,14 @@ const App: React.FC = () => {
   };
 
   const getRandomItems = (arr: string[], count: number) => {
-  const shuffled = [...arr].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
 
-const mainFocus = mainLifts[currentDay % mainLifts.length];
-const olympicFocus = olympicLifts[currentDay % olympicLifts.length];
-const accessories = getRandomItems(accessoryPool, 3);
-const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
+  const mainFocus = mainLifts[currentDay % mainLifts.length];
+  const olympicFocus = olympicLifts[currentDay % olympicLifts.length];
+  const accessories = getRandomItems(accessoryPool, 3);
+  const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
 
   return (
     <div className="app-container">
@@ -144,6 +164,12 @@ const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Fo
           </button>
         </form>
       </div>
+
+      {showInstallButton && (
+        <button onClick={handleInstallClick} style={{ position: 'fixed', bottom: 20, right: 20 }}>
+          Install App
+        </button>
+      )}
     </div>
   );
 };
