@@ -115,6 +115,14 @@ const App: React.FC = () => {
     setCurrentDay((prev) => prev + 1);
   };
 
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState<boolean>(() => {
+    return !localStorage.getItem('disclaimerAccepted');
+  });
+
+  const handleAcknowledgeDisclaimer = () => {
+    localStorage.setItem('disclaimerAccepted', 'true');
+    setShowDisclaimerModal(false);
+  };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { id, value } = e.target;
     setOneRepMax({ ...oneRepMax, [id]: parseInt(value) || 0 });
@@ -158,6 +166,17 @@ const App: React.FC = () => {
   const accessories = getRandomItems(accessoryPool, 3);
   const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
 
+  {showDisclaimerModal && (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>Disclaimer</h2>
+        <p>
+          This app is not intended for beginners. Use at your own risk. Always consult a qualified coach or physician before beginning any training program. The developer assumes no responsibility for injury or harm resulting from use of this app.
+        </p>
+        <button onClick={handleAcknowledgeDisclaimer}>I Acknowledge</button>
+      </div>
+    </div>
+  )}
   return (
     <div className="app-container">
       <div className="calendar-view">
