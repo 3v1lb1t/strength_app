@@ -1,21 +1,9 @@
+// App.tsx (enhanced with SugarWOD API, styled calendar, and localStorage persistence)
 import React, { useEffect, useState } from 'react';
-import './app.css';
+import './App.css';
 
-type Week =
-  | { week: number; type: 'base' | 'deload'; percent: number; reps: string }
-  | { week: number; type: 'wave'; percents: number[]; reps: string[] };
-
-const weeks: Week[] = [
-  { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
-  { week: 2, type: 'base', percent: 0.75, reps: '4x5' },
-  { week: 3, type: 'base', percent: 0.8, reps: '4x4' },
-  { week: 4, type: 'wave', percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
-  { week: 5, type: 'base', percent: 0.82, reps: '3x3' },
-  { week: 6, type: 'wave', percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] },
-  { week: 7, type: 'base', percent: 0.85, reps: '3x2' },
-  { week: 8, type: 'deload', percent: 0.6, reps: '3x5' },
-];
-
+const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
+const olympicLifts = ['clean', 'snatch'];
 const accessoryPool: string[] = [
   'Overhead Press – 3x8 (barbell) @ light to moderate weight',
   'Dumbbell Bench Press – 3x12 @ light to moderate',
@@ -48,8 +36,19 @@ const accessoryPool: string[] = [
   'Tabata Pushups 3 rounds'
 ];
 
-const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
-const olympicLifts = ['clean', 'snatch'];
+const weeks: (
+  | { week: number; type: 'base' | 'deload'; percent: number; reps: string }
+  | { week: number; type: 'wave'; percents: number[]; reps: string[] }
+)[] = [
+  { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
+  { week: 2, type: 'base', percent: 0.75, reps: '4x5' },
+  { week: 3, type: 'base', percent: 0.8, reps: '4x4' },
+  { week: 4, type: 'wave', percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
+  { week: 5, type: 'base', percent: 0.82, reps: '3x3' },
+  { week: 6, type: 'wave', percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] },
+  { week: 7, type: 'base', percent: 0.85, reps: '3x2' },
+  { week: 8, type: 'deload', percent: 0.6, reps: '3x5' },
+];
 
 const App: React.FC = () => {
   const [oneRepMax, setOneRepMax] = useState<Record<string, number>>({
@@ -62,6 +61,11 @@ const App: React.FC = () => {
   });
 
   const [currentDay, setCurrentDay] = useState<number>(0);
+  const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
+    const saved = localStorage.getItem('completedDays');
+    return saved ? JSON.parse(saved) : Array(7).fill(false);
+  });
+  const [wod, setWod] = useState<string>('');
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
 
@@ -75,6 +79,24 @@ const App: React.FC = () => {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('completedDays', JSON.stringify(completedDays));
+  }, [completedDays]);
+
+  useEffect(() => {
+    fetch('https://api.sugarwod.com/v2/workouts?affiliate_id=demo', {
+      headers: {
+        'Authorization': 'Bearer YOUR_API_KEY'
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const workout = data?.data?.[0]?.description || 'No WOD available.';
+        setWod(workout);
+      })
+      .catch(() => setWod('Failed to fetch WOD.'));
+  }, []);
+
   const handleInstallClick = () => {
     if (!deferredPrompt) return;
     (deferredPrompt as any).prompt();
@@ -82,6 +104,15 @@ const App: React.FC = () => {
       setDeferredPrompt(null);
       setShowInstallButton(false);
     });
+  };
+
+  const markDayComplete = () => {
+    setCompletedDays((prev) => {
+      const updated = [...prev];
+      updated[currentDay % 7] = true;
+      return updated;
+    });
+    setCurrentDay((prev) => prev + 1);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -95,7 +126,6 @@ const App: React.FC = () => {
 
   const renderLift = (name: string, liftKey: string) => {
     const week = weeks[currentDay % weeks.length];
-
     if (week.type === 'wave') {
       return (
         <div className="form-group">
@@ -108,7 +138,6 @@ const App: React.FC = () => {
         </div>
       );
     }
-
     const backoffPercent = week.percent - 0.05;
     return (
       <div className="form-group">
@@ -131,14 +160,41 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      <div className="calendar-view">
+        <h3>This Week</h3>
+        <div className="calendar-row">
+          {[...Array(7)].map((_, idx) => (
+            <div
+              key={idx}
+              className={`calendar-day ${completedDays[idx] ? 'completed' : ''}`}
+              onClick={() => setCurrentDay(idx)}
+            >
+              {`Day ${idx + 1}`}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <h1 className="app-title">Strength App: Day {currentDay + 1} – {todayLabel}</h1>
+
+      <div className="wod-section">
+        <h2>Workout of the Day</h2>
+        <p>{wod}</p>
+      </div>
+
       <div className="form-wrapper">
         <form className="form">
           <h2>Enter Your 1 Rep Max</h2>
           {Object.keys(oneRepMax).map((key) => (
             <div className="form-group" key={key}>
               <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)} 1RM</label>
-              <input id={key} type="number" onChange={handleChange} placeholder={`e.g., ${key === 'snatch' ? 155 : 225}`} />
+              <input
+                id={key}
+                type="number"
+                className="small-input"
+                onChange={handleChange}
+                placeholder={`e.g., ${key === 'snatch' ? 155 : 225}`}
+              />
             </div>
           ))}
 
@@ -158,9 +214,9 @@ const App: React.FC = () => {
           <button
             type="button"
             className="submit-button"
-            onClick={() => setCurrentDay((prev) => prev + 1)}
+            onClick={markDayComplete}
           >
-            Next Day
+            Complete Day
           </button>
         </form>
       </div>
