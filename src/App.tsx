@@ -1,4 +1,4 @@
-// App.tsx (enhanced with SugarWOD API, styled calendar, and localStorage persistence)
+// App.tsx (with disclaimer modal and calendar)
 import React, { useEffect, useState } from 'react';
 import './App.css';
 
@@ -36,10 +36,7 @@ const accessoryPool: string[] = [
   'Tabata Pushups 3 rounds'
 ];
 
-const weeks: (
-  | { week: number; type: 'base' | 'deload'; percent: number; reps: string }
-  | { week: number; type: 'wave'; percents: number[]; reps: string[] }
-)[] = [
+const weeks = [
   { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
   { week: 2, type: 'base', percent: 0.75, reps: '4x5' },
   { week: 3, type: 'base', percent: 0.8, reps: '4x4' },
@@ -52,14 +49,8 @@ const weeks: (
 
 const App: React.FC = () => {
   const [oneRepMax, setOneRepMax] = useState<Record<string, number>>({
-    squat: 0,
-    bench: 0,
-    deadlift: 0,
-    press: 0,
-    clean: 0,
-    snatch: 0,
+    squat: 0, bench: 0, deadlift: 0, press: 0, clean: 0, snatch: 0,
   });
-
   const [currentDay, setCurrentDay] = useState<number>(0);
   const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
     const saved = localStorage.getItem('completedDays');
@@ -68,15 +59,14 @@ const App: React.FC = () => {
   const [wod, setWod] = useState<string>('');
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(() => !localStorage.getItem('disclaimerAccepted'));
 
   useEffect(() => {
-    const handler = (e: Event) => {
+    window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallButton(true);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    });
   }, []);
 
   useEffect(() => {
@@ -85,9 +75,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetch('https://api.sugarwod.com/v2/workouts?affiliate_id=demo', {
-      headers: {
-        'Authorization': 'Bearer YOUR_API_KEY'
-      }
+      headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
     })
       .then(res => res.json())
       .then(data => {
@@ -97,64 +85,27 @@ const App: React.FC = () => {
       .catch(() => setWod('Failed to fetch WOD.'));
   }, []);
 
-  const handleInstallClick = () => {
-    if (!deferredPrompt) return;
-    (deferredPrompt as any).prompt();
-    (deferredPrompt as any).userChoice.then(() => {
-      setDeferredPrompt(null);
-      setShowInstallButton(false);
-    });
-  };
-
-  const markDayComplete = () => {
-    setCompletedDays((prev) => {
-      const updated = [...prev];
-      updated[currentDay % 7] = true;
-      return updated;
-    });
-    setCurrentDay((prev) => prev + 1);
-  };
-
-  const [showDisclaimerModal, setShowDisclaimerModal] = useState<boolean>(() => {
-    return !localStorage.getItem('disclaimerAccepted');
-  });
-
   const handleAcknowledgeDisclaimer = () => {
     localStorage.setItem('disclaimerAccepted', 'true');
     setShowDisclaimerModal(false);
   };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setOneRepMax({ ...oneRepMax, [id]: parseInt(value) || 0 });
   };
 
-  const calculateWeight = (percent: number, lift: string): string => {
-    return `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
+  const markDayComplete = () => {
+    setCompletedDays(prev => {
+      const updated = [...prev];
+      updated[currentDay % 7] = true;
+      return updated;
+    });
+    setCurrentDay(prev => prev + 1);
   };
 
-  const renderLift = (name: string, liftKey: string) => {
-    const week = weeks[currentDay % weeks.length];
-    if (week.type === 'wave') {
-      return (
-        <div className="form-group">
-          <label>{name} – Wave Week</label>
-          <ul>
-            {accessories.map((acc, idx) => (
-              <li key={idx}>{acc}</li>
-            ))}
-          </ul>
-        </div>
-      );
-    }
-    const backoffPercent = week.percent - 0.05;
-    return (
-      <div className="form-group">
-        <label>{name} – {week.reps} @ {Math.round(week.percent * 100)}%</label>
-        <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
-        <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {calculateWeight(backoffPercent, liftKey)}</p>
-      </div>
-    );
-  };
+  const calculateWeight = (percent: number, lift: string): string =>
+    `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
 
   const getRandomItems = (arr: string[], count: number) => {
     const shuffled = [...arr].sort(() => 0.5 - Math.random());
@@ -165,87 +116,112 @@ const App: React.FC = () => {
   const olympicFocus = olympicLifts[currentDay % olympicLifts.length];
   const accessories = getRandomItems(accessoryPool, 3);
   const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
+  const week = weeks[currentDay % weeks.length];
 
-  {showDisclaimerModal && (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Disclaimer</h2>
-        <p>
-          This app is not intended for beginners. Use at your own risk. Always consult a qualified coach or physician before beginning any training program. The developer assumes no responsibility for injury or harm resulting from use of this app.
-        </p>
-        <button onClick={handleAcknowledgeDisclaimer}>I Acknowledge</button>
-      </div>
-    </div>
-  )}
-  return (
-    <div className="app-container">
-      <div className="calendar-view">
-        <h3>This Week</h3>
-        <div className="calendar-row">
-          {[...Array(7)].map((_, idx) => (
-            <div
-              key={idx}
-              className={`calendar-day ${completedDays[idx] ? 'completed' : ''}`}
-              onClick={() => setCurrentDay(idx)}
-            >
-              {`Day ${idx + 1}`}
-            </div>
-          ))}
+  const renderLift = (name: string, liftKey: string) => {
+    if (week.type === 'wave') {
+      return (
+        <div className="form-group">
+          <label>{name} – Wave Week</label>
+          <ul>{accessories.map((acc, idx) => <li key={idx}>{acc}</li>)}</ul>
         </div>
+      );
+    }
+    if (typeof week.percent !== 'number' || typeof week.reps !== 'string') return null;
+    const backoff = week.percent - 0.05;
+    return (
+      <div className="form-group">
+        <label>{name} – {week.reps} @ {Math.round(week.percent * 100)}%</label>
+        <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
+        <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {calculateWeight(backoff, liftKey)}</p>
       </div>
+    );
+  };
 
-      <h1 className="app-title">Strength App: Day {currentDay + 1} – {todayLabel}</h1>
-
-      <div className="wod-section">
-        <h2>Workout of the Day</h2>
-        <p>{wod}</p>
-      </div>
-
-      <div className="form-wrapper">
-        <form className="form">
-          <h2>Enter Your 1 Rep Max</h2>
-          {Object.keys(oneRepMax).map((key) => (
-            <div className="form-group" key={key}>
-              <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)} 1RM</label>
-              <input
-                id={key}
-                type="number"
-                className="small-input"
-                onChange={handleChange}
-                placeholder={`e.g., ${key === 'snatch' ? 155 : 225}`}
-              />
-            </div>
-          ))}
-
-          <h2>Main Movement</h2>
-          {renderLift(mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1), mainFocus)}
-
-          <h2>Olympic Movement</h2>
-          {renderLift(olympicFocus.charAt(0).toUpperCase() + olympicFocus.slice(1), olympicFocus)}
-
-          <h2>Accessory Work</h2>
-          <ul>
-            {accessories.map((acc, idx) => (
-              <li key={idx}>{acc}</li>
-            ))}
-          </ul>
-
-          <button
-            type="button"
-            className="submit-button"
-            onClick={markDayComplete}
-          >
-            Complete Day
-          </button>
-        </form>
-      </div>
-
-      {showInstallButton && (
-        <button onClick={handleInstallClick} style={{ position: 'fixed', bottom: 20, right: 20 }}>
-          Install App
-        </button>
+  return (
+    <>
+      {showDisclaimerModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Disclaimer</h2>
+            <p>
+              This app is not intended for beginners. Use at your own risk. Always consult a qualified coach or physician before beginning any training program. The developer assumes no responsibility for injury or harm resulting from use of this app.
+            </p>
+            <button onClick={handleAcknowledgeDisclaimer}>I Acknowledge</button>
+          </div>
+        </div>
       )}
-    </div>
+
+      {!showDisclaimerModal && (
+        <div className="app-container">
+          <div className="calendar-view">
+            <h3>This Week</h3>
+            <div className="calendar-row">
+              {[...Array(7)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`calendar-day ${completedDays[idx] ? 'completed' : ''}`}
+                  onClick={() => setCurrentDay(idx)}
+                >
+                  {`Day ${idx + 1}`}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <h1 className="app-title">Strength App: Day {currentDay + 1} – {todayLabel}</h1>
+
+          <div className="wod-section">
+            <h2>Workout of the Day</h2>
+            <p>{wod}</p>
+          </div>
+
+          <div className="form-wrapper">
+            <form className="form">
+              <h2>Enter Your 1 Rep Max</h2>
+              {Object.keys(oneRepMax).map(key => (
+                <div className="form-group" key={key}>
+                  <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)} 1RM</label>
+                  <input
+                    id={key}
+                    type="number"
+                    className="small-input"
+                    onChange={handleChange}
+                    placeholder={`e.g., ${key === 'snatch' ? 155 : 225}`}
+                  />
+                </div>
+              ))}
+
+              <h2>Main Movement</h2>
+              {renderLift(mainFocus, mainFocus)}
+
+              <h2>Olympic Movement</h2>
+              {renderLift(olympicFocus, olympicFocus)}
+
+              <h2>Accessory Work</h2>
+              <ul>{accessories.map((acc, idx) => <li key={idx}>{acc}</li>)}</ul>
+
+              <button type="button" className="submit-button" onClick={markDayComplete}>
+                Complete Day
+              </button>
+            </form>
+          </div>
+
+          {showInstallButton && (
+            <button onClick={() => {
+              if (!deferredPrompt) return;
+              (deferredPrompt as any).prompt();
+              (deferredPrompt as any).userChoice.then(() => {
+                setDeferredPrompt(null);
+                setShowInstallButton(false);
+              });
+            }} style={{ position: 'fixed', bottom: 20, right: 20 }}>
+              Install App
+            </button>
+          )}
+        </div>
+      )}
+    </>
   );
 };
 
