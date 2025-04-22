@@ -1,0 +1,148 @@
+[
+    {
+      "name": "Overhead Press",
+      "description": "3x8 (barbell) @ light to moderate weight",
+      "instructions": "Stand tall, brace your core, and press the barbell straight overhead while keeping your elbows slightly in front of the bar."
+    },
+    {
+      "name": "Dumbbell Bench Press",
+      "description": "3x12 @ light to moderate",
+      "instructions": "Lower dumbbells to chest level and press them upward, keeping wrists straight and elbows at 45°."
+    },
+    {
+      "name": "Incline Bench Press",
+      "description": "3x10 @ light to moderate",
+      "instructions": "Press the barbell from chest to overhead on a 30–45° incline bench. Control the descent."
+    },
+    {
+      "name": "Dumbbell Incline Bench",
+      "description": "3x10 @ light to moderate",
+      "instructions": "Perform like the incline barbell press but with dumbbells. Keep a steady rhythm."
+    },
+    {
+      "name": "Chin-ups",
+      "description": "3xMax",
+      "instructions": "Pull your chin above the bar using an underhand grip. Control your descent."
+    },
+    {
+      "name": "Pull-ups",
+      "description": "3xMax",
+      "instructions": "Use an overhand grip. Pull until your chin clears the bar, then lower under control."
+    },
+    {
+      "name": "Renegade Rows",
+      "description": "3x10",
+      "instructions": "From a push-up position on dumbbells, row one dumbbell to your side while stabilizing your core."
+    },
+    {
+      "name": "Russian Twists",
+      "description": "3x20",
+      "instructions": "Sit with heels raised, twist your torso to tap each side of your hips with a weight or hands."
+    },
+    {
+      "name": "Plate Overhead Lunge",
+      "description": "2x10/leg",
+      "instructions": "Hold a plate overhead with arms locked. Step into lunges while keeping the plate steady overhead."
+    },
+    {
+      "name": "Goblet Squat",
+      "description": "3x12",
+      "instructions": "Hold a kettlebell or dumbbell at chest. Squat down keeping torso upright and heels flat."
+    },
+    {
+      "name": "Bodyweight Dips",
+      "description": "3xMax",
+      "instructions": "Lower yourself between bars until elbows are 90°. Push back up without swinging."
+    },
+    {
+      "name": "Burpee to Renegade Row",
+      "description": "3x10",
+      "instructions": "Perform a burpee with push-up and row a dumbbell to your side at the bottom before jumping back up."
+    },
+    {
+      "name": "Dumbbell Lunges",
+      "description": "3x12",
+      "instructions": "Hold dumbbells at your side and lunge forward, lowering the back knee just above the floor."
+    },
+    {
+      "name": "Kettlebell Front Rack Lunge",
+      "description": "3x10",
+      "instructions": "Hold kettlebells in the front rack position and perform alternating lunges with an upright torso."
+    },
+    {
+      "name": "Farmers Carry",
+      "description": "3x100m",
+      "instructions": "Carry heavy dumbbells or kettlebells at your side. Walk with a strong grip and upright posture."
+    },
+    {
+      "name": "Plank Rows",
+      "description": "3x10",
+      "instructions": "Hold a plank on dumbbells and row one arm at a time, avoiding hip rotation."
+    },
+    {
+      "name": "Overhead Plate Carry",
+      "description": "2x30s",
+      "instructions": "Hold a plate locked out overhead. Walk steadily while bracing your core and staying upright."
+    },
+    {
+      "name": "Push-ups",
+      "description": "3xMax",
+      "instructions": "Lower your chest to the floor with elbows at 45°. Push back to full extension."
+    },
+    {
+      "name": "Handstand Hold",
+      "description": "3x30sec",
+      "instructions": "Kick up to a wall-supported handstand. Keep your body tight and straight during the hold."
+    },
+    {
+      "name": "Push Press",
+      "description": "3x8 @ moderate weight",
+      "instructions": "Dip slightly and drive the bar overhead with leg drive. Lockout with arms straight overhead."
+    },
+    {
+      "name": "Behind Neck Push Press",
+      "description": "3x8 @ moderate weight",
+      "instructions": "Dip and drive the bar from behind the neck. Ensure mobility and control to avoid shoulder strain."
+    },
+    {
+      "name": "Snatch Balance",
+      "description": "5x3 @ light weight",
+      "instructions": "With the bar behind neck, quickly drop into a squat while pressing overhead into snatch position."
+    },
+    {
+      "name": "Push Jerk",
+      "description": "3x3 @ moderate weight",
+      "instructions": "Dip and drive the bar overhead, then quickly re-dip under it with locked arms and stand to finish."
+    },
+    {
+      "name": "Split Jerk",
+      "description": "3x3 @ moderate weight",
+      "instructions": "Dip, drive and split one foot forward and the other back while punching the bar overhead."
+    },
+    {
+      "name": "L-Sit",
+      "description": "3x10sec",
+      "instructions": "Support yourself on parallettes or dip bars. Hold legs straight in front at hip height."
+    },
+    {
+      "name": "Clean Pulls",
+      "description": "3x10 @ light/moderate weight",
+      "instructions": "Perform the first half of a clean—extend through hips, pull to shrug, no arm bend."
+    },
+    {
+      "name": "Sumo Deadlift High Pulls",
+      "description": "3x10 @ light weight",
+      "instructions": "Start wide stance, pull barbell to chin after explosive hip extension. Keep elbows high."
+    },
+    {
+      "name": "Tabata Burpees",
+      "description": "3 rounds",
+      "instructions": "Perform 20s of burpees, 10s rest. Complete 8 rounds. Repeat for 3 total Tabata cycles."
+    },
+    {
+      "name": "Tabata Pushups",
+      "description": "3 rounds",
+      "instructions": "Perform push-ups 20s on, 10s off. 8 rounds per set. Repeat for 3 Tabata sets."
+    }
+  ]
+  
