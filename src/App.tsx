@@ -55,7 +55,13 @@ const App: React.FC = () => {
 
   
 
-  const selectedAccessories = getRandomItems(accessoryPool, 3);
+  const [selectedAccessories, setSelectedAccessories] = useState<typeof accessoryPool>([]);
+
+  useEffect(() => {
+    if (accessoryPool.length > 0) {
+      setSelectedAccessories(getRandomItems(accessoryPool, 3));
+    }
+  }, [accessoryPool]);
   
 
   
