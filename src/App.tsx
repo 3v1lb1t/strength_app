@@ -18,8 +18,10 @@ const weeks: Week[] = [
 ];
 
 const accessoryPool: string[] = [
-  'Overhead Press – 3x8 (barbell)',
-  'Dumbbell Bench Press – 3x12',
+  'Overhead Press – 3x8 (barbell) @ light to moderate weight',
+  'Dumbbell Bench Press – 3x12 @ light to moderate',
+  'Incline Bench Press - 3x10 @ light to moderate',
+  'Dumbbell Incline Bench - 3x10 @ light to moderate',
   'Chin-ups – 3xMax',
   'Pull-ups – 3xMax',
   'Renegade Rows – 3x10',
@@ -29,16 +31,22 @@ const accessoryPool: string[] = [
   'Bodyweight Dips – 3xMax',
   'Burpee to Renegade Row – 3x10',
   'Dumbbell Lunges – 3x12',
+  'Kettlebell Front rack lunge 3x10',
+  'Farmers Carry 3x100m',
   'Plank Rows – 3x10',
   'Overhead Plate Carry – 2x30s',
   'Push-ups – 3xMax',
-  'Dumbbell Bench Press - 3x8',
-  'Handstand Hold - 3x30sec',
-  'Push Press - 3x8 @ moderate weight',
-  'Snatch Balance - 5x3 @ light weight',
-  'Push Jerk - 3x3 @ moderate weight ',
-  'Split Jerk - 3x3 @ moderate weight',
-  'L-Sit - 3x10sec'
+  'Handstand Hold – 3x30sec',
+  'Push Press – 3x8 @ moderate weight',
+  'Behind Neck (BN) Push Press 3x8 @ moderate weight',
+  'Snatch Balance – 5x3 @ light weight',
+  'Push Jerk – 3x3 @ moderate weight ',
+  'Split Jerk – 3x3 @ moderate weight',
+  'L-Sit – 3x10sec',
+  'Clean Pulls: 3x10 @ light/moderate weight',
+  'Sumo Deadlift High Pulls 3x10 @ light weight',
+  'Tabata Burpees 3 rounds',
+  'Tabata Pushups 3 rounds'
 ];
 
 const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
