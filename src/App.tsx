@@ -1,40 +1,14 @@
-// App.tsx (with disclaimer modal and calendar)
+// App.tsx (Full Updated Script)
 import React, { useEffect, useState } from 'react';
 import './App.css';
 
+const getRandomItems = <T,>(arr: T[], count: number): T[] => {
+  const shuffled = [...arr].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
 const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
 const olympicLifts = ['clean', 'snatch'];
-const accessoryPool: string[] = [
-  'Overhead Press – 3x8 (barbell) @ light to moderate weight',
-  'Dumbbell Bench Press – 3x12 @ light to moderate',
-  'Incline Bench Press - 3x10 @ light to moderate',
-  'Dumbbell Incline Bench - 3x10 @ light to moderate',
-  'Chin-ups – 3xMax',
-  'Pull-ups – 3xMax',
-  'Renegade Rows – 3x10',
-  'Russian Twists – 3x20',
-  'Plate Overhead Lunge – 2x10/leg',
-  'Goblet Squat – 3x12',
-  'Bodyweight Dips – 3xMax',
-  'Burpee to Renegade Row – 3x10',
-  'Dumbbell Lunges – 3x12',
-  'Kettlebell Front rack lunge 3x10',
-  'Farmers Carry 3x100m',
-  'Plank Rows – 3x10',
-  'Overhead Plate Carry – 2x30s',
-  'Push-ups – 3xMax',
-  'Handstand Hold – 3x30sec',
-  'Push Press – 3x8 @ moderate weight',
-  'Behind Neck (BN) Push Press 3x8 @ moderate weight',
-  'Snatch Balance – 5x3 @ light weight',
-  'Push Jerk – 3x3 @ moderate weight ',
-  'Split Jerk – 3x3 @ moderate weight',
-  'L-Sit – 3x10sec',
-  'Clean Pulls: 3x10 @ light/moderate weight',
-  'Sumo Deadlift High Pulls 3x10 @ light weight',
-  'Tabata Burpees 3 rounds',
-  'Tabata Pushups 3 rounds'
-];
 
 const weeks = [
   { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
@@ -48,90 +22,52 @@ const weeks = [
 ];
 
 const App: React.FC = () => {
+  const [mainFocus, setMainFocus] = useState<string>(() => getRandomItems(mainLifts, 1)[0]);
+  const [olympicFocus, setOlympicFocus] = useState<string>(() => getRandomItems(olympicLifts, 1)[0]);
+  const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
+    const saved = localStorage.getItem('completedDays');
+    return saved ? JSON.parse(saved) : Array(7).fill(false);
+  });
+
+  const [currentDay, setCurrentDay] = useState<number>(0);
+
   const savedOneRepMax = localStorage.getItem('oneRepMax');
   const [oneRepMax, setOneRepMax] = useState<Record<string, number>>(
     savedOneRepMax ? JSON.parse(savedOneRepMax) : {
       squat: 0, bench: 0, deadlift: 0, press: 0, clean: 0, snatch: 0,
     }
   );
-  const [currentDay, setCurrentDay] = useState<number>(0);
-  const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
-    const saved = localStorage.getItem('completedDays');
-    return saved ? JSON.parse(saved) : Array(7).fill(false);
-  });
-  const [wod, setWod] = useState<string>('');
+  const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/data/accessories.json')
+      .then(res => res.json())
+      .then(data => setAccessoryPool(data))
+      .catch(err => console.error('Failed to load accessory data:', err));
+  }, []);
+
+  
+  
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [showIOSTooltip, setShowIOSTooltip] = useState(false);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(() => !localStorage.getItem('disclaimerAccepted'));
 
-  useEffect(() => {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallButton(true);
-    });
-  }, []);
+  
 
-  useEffect(() => {
-    localStorage.setItem('completedDays', JSON.stringify(completedDays));
-  }, [completedDays]);
+  const selectedAccessories = getRandomItems(accessoryPool, 3);
+  
 
-  useEffect(() => {
-    fetch('https://api.sugarwod.com/v2/workouts?affiliate_id=demo', {
-      headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
-    })
-      .then(res => res.json())
-      .then(data => {
-        const workout = data?.data?.[0]?.description || 'No WOD available.';
-        setWod(workout);
-      })
-      .catch(() => setWod('Failed to fetch WOD.'));
-  }, []);
+  
 
-  const handleAcknowledgeDisclaimer = () => {
-    localStorage.setItem('disclaimerAccepted', 'true');
-    setShowDisclaimerModal(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    const updated = { ...oneRepMax, [id]: parseInt(value) || 0 };
-    setOneRepMax(updated);
-    localStorage.setItem('oneRepMax', JSON.stringify(updated));
-  };
-
-  const markDayComplete = () => {
-    setCompletedDays(prev => {
-      const updated = [...prev];
-      updated[currentDay % 7] = true;
-      return updated;
-    });
-    setCurrentDay(prev => prev + 1);
-  };
-
-  const calculateWeight = (percent: number, lift: string): string =>
-    `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
-
-  const getRandomItems = (arr: string[], count: number) => {
-    const shuffled = [...arr].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  };
-
-  const mainFocus = mainLifts[currentDay % mainLifts.length];
-  const olympicFocus = olympicLifts[currentDay % olympicLifts.length];
-  const accessories = getRandomItems(accessoryPool, 3);
+  
+  
   const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
   const week = weeks[currentDay % weeks.length];
 
+  const calculateWeight = (percent: number, lift: string): string => `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
+
   const renderLift = (name: string, liftKey: string) => {
-    if (week.type === 'wave') {
-      return (
-        <div className="form-group">
-          <label>{name} – Wave Week</label>
-          <ul>{accessories.map((acc, idx) => <li key={idx}>{acc}</li>)}</ul>
-        </div>
-      );
-    }
     if (typeof week.percent !== 'number' || typeof week.reps !== 'string') return null;
     const backoff = week.percent - 0.05;
     return (
@@ -145,6 +81,13 @@ const App: React.FC = () => {
 
   return (
     <>
+      {showIOSTooltip && (
+        <div className="ios-tooltip">
+          <strong>Install on iOS:</strong>
+          <p style={{ margin: 0 }}>Tap the Share icon <span style={{ fontSize: '1.2em' }}>📤</span> and select <strong>"Add to Home Screen"</strong>.</p>
+          <button onClick={() => setShowIOSTooltip(false)} style={{ marginTop: '0.5rem' }}>Close</button>
+        </div>
+      )}
       {showDisclaimerModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -152,7 +95,10 @@ const App: React.FC = () => {
             <p>
               This app is not intended for beginners. Use at your own risk. Always consult a qualified coach or physician before beginning any training program. The developer assumes no responsibility for injury or harm resulting from use of this app.
             </p>
-            <button onClick={handleAcknowledgeDisclaimer}>I Acknowledge</button>
+            <button onClick={() => {
+              localStorage.setItem('disclaimerAccepted', 'true');
+              setShowDisclaimerModal(false);
+            }}>I Acknowledge</button>
           </div>
         </div>
       )}
@@ -162,28 +108,46 @@ const App: React.FC = () => {
           <div className="calendar-view">
             <h3>This Week</h3>
             <div className="calendar-row">
-              {[...Array(7)].map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`calendar-day ${completedDays[idx] ? 'completed' : ''}`}
-                  onClick={() => setCurrentDay(idx)}
-                >
-                  {`Day ${idx + 1}`}
-                </div>
-              ))}
+              {[...Array(7)].map((_, idx) => {
+                const today = new Date();
+                const date = new Date(today);
+                date.setDate(today.getDate() - today.getDay() + idx);
+                const dayLabel = date.toLocaleDateString(undefined, { weekday: 'short' });
+                const dateLabel = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                return (
+                  <div
+                    key={idx}
+                    className={`calendar-day-square ${completedDays[idx] ? 'completed' : ''}`}
+                    onClick={() => setCurrentDay(idx)}
+                  >
+                    <div>{dayLabel}</div>
+                    <div>{dateLabel}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           <h1 className="app-title">Strength App: Day {currentDay + 1} – {todayLabel}</h1>
 
-          <div className="wod-section">
-            <h2>Workout of the Day</h2>
-            <p>{wod}</p>
-          </div>
+          
 
           <div className="form-wrapper">
             <form className="form">
               <h2>Enter Your 1 Rep Max</h2>
+              <button
+                type="button"
+                className="reset-button"
+                onClick={() => {
+                  const cleared = {
+                    squat: 0, bench: 0, deadlift: 0, press: 0, clean: 0, snatch: 0,
+                  };
+                  setOneRepMax(cleared);
+                  localStorage.setItem('oneRepMax', JSON.stringify(cleared));
+                }}
+              >
+                Reset 1RMs
+              </button>
               {Object.keys(oneRepMax).map(key => (
                 <div className="form-group" key={key}>
                   <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)} 1RM</label>
@@ -191,7 +155,13 @@ const App: React.FC = () => {
                     id={key}
                     type="number"
                     className="small-input"
-                    onChange={handleChange}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const { id, value } = e.target;
+                    const updated = { ...oneRepMax, [id]: parseInt(value) || 0 };
+                    setOneRepMax(updated);
+                    localStorage.setItem('oneRepMax', JSON.stringify(updated));
+                  }}
+                    value={oneRepMax[key]}
                     placeholder={`e.g., ${key === 'snatch' ? 155 : 225}`}
                   />
                 </div>
@@ -204,9 +174,20 @@ const App: React.FC = () => {
               {renderLift(olympicFocus, olympicFocus)}
 
               <h2>Accessory Work</h2>
-              <ul>{accessories.map((acc, idx) => <li key={idx}>{acc}</li>)}</ul>
+              <ul>
+                {selectedAccessories.map((acc, idx) => (
+                  <AccessoryItem key={idx} accessory={acc} />
+                ))}
+              </ul>
 
-              <button type="button" className="submit-button" onClick={markDayComplete}>
+              <button type="button" className="submit-button" onClick={() => {
+                setCompletedDays(prev => {
+                  const updated = [...prev];
+                  updated[currentDay % 7] = true;
+                  return updated;
+                });
+                setCurrentDay(prev => prev + 1);
+              }}>
                 Complete Day
               </button>
             </form>
@@ -214,7 +195,10 @@ const App: React.FC = () => {
 
           {showInstallButton && (
             <button onClick={() => {
-              if (!deferredPrompt) return;
+              if (!deferredPrompt) {
+                setShowIOSTooltip(true);
+                return;
+              }
               (deferredPrompt as any).prompt();
               (deferredPrompt as any).userChoice.then(() => {
                 setDeferredPrompt(null);
@@ -227,6 +211,32 @@ const App: React.FC = () => {
         </div>
       )}
     </>
+  );
+};
+
+const AccessoryItem: React.FC<{ accessory: { name: string; description: string; instructions: string; video?: string } }> = ({ accessory }) => {
+  const [showDetail, setShowDetail] = useState(false);
+  return (
+    <li>
+      <strong>{accessory.name} – {accessory.description}</strong>
+      <button
+        type="button"
+        onClick={() => setShowDetail(prev => !prev)}
+        style={{ marginLeft: '0.5rem' }}
+      >
+        {showDetail ? 'Hide' : 'Show'} Instructions
+      </button>
+      {showDetail && (
+        <div style={{ marginTop: '0.25rem' }}>
+          <p>{accessory.instructions}</p>
+          {accessory.video && (
+            <a href={accessory.video} target="_blank" rel="noopener noreferrer">
+              Watch Demo
+            </a>
+          )}
+        </div>
+      )}
+    </li>
   );
 };
 
