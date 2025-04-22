@@ -31,7 +31,14 @@ const accessoryPool: string[] = [
   'Dumbbell Lunges – 3x12',
   'Plank Rows – 3x10',
   'Overhead Plate Carry – 2x30s',
-  'Push-ups – 3xMax'
+  'Push-ups – 3xMax',
+  'Dumbbell Bench Press - 3x8',
+  'Handstand Hold - 3x30sec',
+  'Push Press - 3x8 @ moderate weight',
+  'Snatch Balance - 5x3 @ light weight',
+  'Push Jerk - 3x3 @ moderate weight ',
+  'Split Jerk - 3x3 @ moderate weight',
+  'L-Sit - 3x10sec'
 ];
 
 const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
