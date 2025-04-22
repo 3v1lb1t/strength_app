@@ -48,9 +48,12 @@ const weeks = [
 ];
 
 const App: React.FC = () => {
-  const [oneRepMax, setOneRepMax] = useState<Record<string, number>>({
-    squat: 0, bench: 0, deadlift: 0, press: 0, clean: 0, snatch: 0,
-  });
+  const savedOneRepMax = localStorage.getItem('oneRepMax');
+  const [oneRepMax, setOneRepMax] = useState<Record<string, number>>(
+    savedOneRepMax ? JSON.parse(savedOneRepMax) : {
+      squat: 0, bench: 0, deadlift: 0, press: 0, clean: 0, snatch: 0,
+    }
+  );
   const [currentDay, setCurrentDay] = useState<number>(0);
   const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
     const saved = localStorage.getItem('completedDays');
@@ -92,7 +95,9 @@ const App: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setOneRepMax({ ...oneRepMax, [id]: parseInt(value) || 0 });
+    const updated = { ...oneRepMax, [id]: parseInt(value) || 0 };
+    setOneRepMax(updated);
+    localStorage.setItem('oneRepMax', JSON.stringify(updated));
   };
 
   const markDayComplete = () => {
