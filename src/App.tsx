@@ -168,14 +168,8 @@ const App: React.FC = () => {
   const savedOlyFocus = localStorage.getItem('olympicFocusWeek');
   const savedWeekIndex = localStorage.getItem('trainingWeek');
 
-  const [mainFocus, setMainFocus] = useState<string>(() => {
-    const current = parseInt(localStorage.getItem('currentDay') || '0');
-    return localStorage.getItem(`mainLift_${current}`) || mainLifts[0];
-  });
-  const [olympicFocus, setOlympicFocus] = useState<string>(() => {
-    const current = parseInt(localStorage.getItem('currentDay') || '0');
-    return localStorage.getItem(`olyLift_${current}`) || olympicLifts[0];
-  });
+  const [mainFocus, setMainFocus] = useState<string>('');
+  const [olympicFocus, setOlympicFocus] = useState<string>('');
   const [trainingWeek, setTrainingWeek] = useState<number>(() => savedWeekIndex ? parseInt(savedWeekIndex) : 0);
   const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
     const saved = localStorage.getItem('completedDays');
@@ -186,6 +180,13 @@ const App: React.FC = () => {
     const savedDay = localStorage.getItem('currentDay');
     return savedDay ? parseInt(savedDay) : 0;
   });
+
+  useEffect(() => {
+    const newMain = localStorage.getItem(`mainLift_${currentDay}`) || mainLifts[0];
+    const newOly = localStorage.getItem(`olyLift_${currentDay}`) || olympicLifts[0];
+    setMainFocus(newMain);
+    setOlympicFocus(newOly);
+  }, [currentDay]);
 
   const savedOneRepMax = localStorage.getItem('oneRepMax');
   const [oneRepMax, setOneRepMax] = useState<Record<string, number>>(
