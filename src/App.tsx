@@ -10,16 +10,37 @@ const getRandomItems = <T,>(arr: T[], count: number): T[] => {
 const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
 const olympicLifts = ['clean', 'snatch'];
 
-const weeks = [
-  { week: 1, type: 'base', percent: 0.7, reps: '3x6' },
-  { week: 2, type: 'base', percent: 0.75, reps: '3x5' },
-  { week: 3, type: 'base', percent: 0.8, reps: '3x4' },
-  { week: 4, type: 'wave', percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
-  { week: 5, type: 'base', percent: 0.82, reps: '2x3' },
-  { week: 6, type: 'wave', percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] },
-  { week: 7, type: 'base', percent: 0.85, reps: '2x2' },
-  { week: 8, type: 'deload', percent: 0.6, reps: '3x5' },
-];
+const weeks = Array.from({ length: 9 }, (_, i) => {
+  if (i === 8) return { week: 9, type: 'test', percent: 1.0, reps: '1x1' };
+  if (i === 7) return { week: 8, type: 'deload', percent: 0.6, reps: '3x5' };
+
+  const waveTemplate = [
+    { percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
+    { percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] }
+  ];
+
+  const baseWeeks = [
+    { percent: 0.6, reps: '1x8 (30s rest)' },
+    { percent: 0.7, reps: '4x6' },
+    { percent: 0.75, reps: '4x5' },
+    { percent: 0.8, reps: '4x4' },
+    { percent: 0.82, reps: '3x3' },
+    { percent: 0.85, reps: '3x3' },
+    { percent: 0.9, reps: '3x2' },
+    { percent: 0.94, reps: '3x1' },
+    { percent: 0.97, reps: '2x1' }
+  ];
+
+  const shouldWave = i > 4 && Math.random() < 0.4 && i !== 6; // no back-to-back waves
+
+  if (shouldWave && !weeks?.[i - 1]?.type?.includes('wave')) {
+    const wave = waveTemplate[Math.floor(Math.random() * waveTemplate.length)];
+    return { week: i + 1, type: 'wave', ...wave };
+  }
+
+  const base = baseWeeks[Math.min(i, baseWeeks.length - 1)];
+  return { week: i + 1, type: 'base', ...base };
+});
 
 const App: React.FC = () => {
   const savedMainFocus = localStorage.getItem('mainFocusWeek');
@@ -76,18 +97,42 @@ const App: React.FC = () => {
 
   
   
-  const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
+  const savedMainFocusSet = localStorage.getItem('mainFocusSet');
+  const [mainFocusSet, setMainFocusSet] = useState<string[]>(() =>
+    savedMainFocusSet ? JSON.parse(savedMainFocusSet) : getRandomItems(mainLifts.filter(l => l !== olympicFocus), 2)
+  );
+  const todayLabel = `${mainFocusSet.map(l => l.charAt(0).toUpperCase() + l.slice(1)).join(' & ')} Focus`;
   const week = weeks[trainingWeek % weeks.length];
 
   const calculateWeight = (percent: number, lift: string): string => `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
 
   const renderLift = (name: string, liftKey: string) => {
+    if (week.type === 'test') {
+      return (
+        <div className="form-group">
+          <label>{name} – Test 1RM</label>
+          <input
+            type="number"
+            placeholder="Enter your tested 1RM"
+            onChange={(e) => {
+              const updated = { ...oneRepMax, [liftKey]: parseInt(e.target.value) || 0 };
+              setOneRepMax(updated);
+              localStorage.setItem('oneRepMax', JSON.stringify(updated));
+            }}
+            value={oneRepMax[liftKey] || ''}
+          />
+        </div>
+      );
+    }
     if (typeof week.percent !== 'number' || typeof week.reps !== 'string') return null;
-    const backoff = week.percent - 0.05;
+    const backoff = (week.percent ?? 0) - 0.05;
     return (
       <div className="form-group">
         <label>{name} – {week.reps} @ {Math.round(week.percent * 100)}%</label>
         <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
+        {week.reps.includes('rest') && (
+          <p><em>Rest: {week.reps.split('(')[1].replace(')', '')}</em></p>
+        )}
         <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {calculateWeight(backoff, liftKey)}</p>
       </div>
     );
@@ -181,8 +226,8 @@ const App: React.FC = () => {
                 </div>
               ))}
 
-              <h2>Main Movement</h2>
-              {renderLift(mainFocus, mainFocus)}
+              <h2>Main Movements</h2>
+              {mainFocusSet.map((lift) => renderLift(lift, lift))}
 
               <h2>Olympic Movement</h2>
               {renderLift(olympicFocus, olympicFocus)}
@@ -208,9 +253,12 @@ const App: React.FC = () => {
                   const newMain = getRandomItems(mainLifts.filter(l => l !== mainFocus), 1)[0];
                   const newOly = getRandomItems(olympicLifts.filter(l => l !== olympicFocus), 1)[0];
 
-                  setMainFocus(newMain);
+                  const newMainSet = getRandomItems(mainLifts.filter(l => ![...mainFocusSet, newOly].includes(l)), 2);
+                  setMainFocusSet(newMainSet);
+                  setMainFocus(newMainSet[0]);
                   setOlympicFocus(newOly);
 
+                  localStorage.setItem('mainFocusSet', JSON.stringify(newMainSet));
                   localStorage.setItem('mainFocusWeek', newMain);
                   localStorage.setItem('olympicFocusWeek', newOly);
                   localStorage.setItem('trainingWeek', newWeek.toString());
