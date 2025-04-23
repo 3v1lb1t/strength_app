@@ -10,37 +10,56 @@ const getRandomItems = <T,>(arr: T[], count: number): T[] => {
 const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
 const olympicLifts = ['clean', 'snatch'];
 
-const weeks = Array.from({ length: 9 }, (_, i) => {
-  if (i === 8) return { week: 9, type: 'test', percent: 1.0, reps: '1x1' };
-  if (i === 7) return { week: 8, type: 'deload', percent: 0.6, reps: '3x5' };
-
+const generateWeeks = () => {
   const waveTemplate = [
     { percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
     { percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] }
   ];
 
   const baseWeeks = [
-    { percent: 0.6, reps: '1x8 (30s rest)' },
-    { percent: 0.7, reps: '4x6' },
-    { percent: 0.75, reps: '4x5' },
-    { percent: 0.8, reps: '4x4' },
-    { percent: 0.82, reps: '3x3' },
-    { percent: 0.85, reps: '3x3' },
+    { percent: 0.7, reps: '3x6' },
+    { percent: 0.75, reps: '3x5' },
+    { percent: 0.8, reps: '3x4' },
+    { percent: 0.82, reps: '2x3' },
+    { percent: 0.85, reps: '2x2' },
     { percent: 0.9, reps: '3x2' },
-    { percent: 0.94, reps: '3x1' },
-    { percent: 0.97, reps: '2x1' }
+    { percent: 0.95, reps: '3x2' }
   ];
 
-  const shouldWave = i > 4 && Math.random() < 0.4 && i !== 6; // no back-to-back waves
+  const usedWaveLifts = new Set();
+  const result = [];
 
-  if (shouldWave && !weeks?.[i - 1]?.type?.includes('wave')) {
-    const wave = waveTemplate[Math.floor(Math.random() * waveTemplate.length)];
-    return { week: i + 1, type: 'wave', ...wave };
+  for (let i = 0; i < 9; i++) {
+    if (i === 8) {
+      result.push({ week: 9, type: 'test', percent: 1.0, reps: '1x1' });
+      continue;
+    }
+    if (i === 7) {
+      result.push({ week: 8, type: 'deload', percent: 0.6, reps: '3x5' });
+      continue;
+    }
+
+    const isWaveWeek = i > 4 && Math.random() < 0.4 && result[i - 1]?.type !== 'wave';
+
+    if (isWaveWeek) {
+      const availableWaveLifts = mainLifts.filter(l => !usedWaveLifts.has(l));
+      if (availableWaveLifts.length > 0) {
+        const wave = waveTemplate[Math.floor(Math.random() * waveTemplate.length)];
+        const assignedLift = getRandomItems(availableWaveLifts, 1)[0];
+        usedWaveLifts.add(assignedLift);
+        result.push({ week: i + 1, type: 'wave', assignedLift, ...wave });
+        continue;
+      }
+    }
+
+    const base = baseWeeks[Math.min(i, baseWeeks.length - 1)];
+    result.push({ week: i + 1, type: 'base', ...base });
   }
 
-  const base = baseWeeks[Math.min(i, baseWeeks.length - 1)];
-  return { week: i + 1, type: 'base', ...base };
-});
+  return result;
+};
+
+const weeks = generateWeeks();
 
 const App: React.FC = () => {
   const savedMainFocus = localStorage.getItem('mainFocusWeek');
@@ -88,20 +107,22 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (accessoryPool.length > 0) {
-      setSelectedAccessories(getRandomItems(accessoryPool, 3));
+      const previous = currentDay > 0 ? selectedAccessories.map(a => a.name) : [];
+      const available = accessoryPool.filter(a => !previous.includes(a.name));
+      const accessories = getRandomItems(
+        available.length >= 3 ? available : accessoryPool,
+        3
+      );
+      setSelectedAccessories(accessories);
     }
-  }, [accessoryPool]);
+  }, [accessoryPool, currentDay]);
   
 
   
 
   
   
-  const savedMainFocusSet = localStorage.getItem('mainFocusSet');
-  const [mainFocusSet, setMainFocusSet] = useState<string[]>(() =>
-    savedMainFocusSet ? JSON.parse(savedMainFocusSet) : getRandomItems(mainLifts.filter(l => l !== olympicFocus), 2)
-  );
-  const todayLabel = `${mainFocusSet.map(l => l.charAt(0).toUpperCase() + l.slice(1)).join(' & ')} Focus`;
+  const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
   const week = weeks[trainingWeek % weeks.length];
 
   const calculateWeight = (percent: number, lift: string): string => `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
@@ -125,14 +146,11 @@ const App: React.FC = () => {
       );
     }
     if (typeof week.percent !== 'number' || typeof week.reps !== 'string') return null;
-    const backoff = (week.percent ?? 0) - 0.05;
+    const backoff = week.percent - 0.05;
     return (
       <div className="form-group">
         <label>{name} – {week.reps} @ {Math.round(week.percent * 100)}%</label>
         <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
-        {week.reps.includes('rest') && (
-          <p><em>Rest: {week.reps.split('(')[1].replace(')', '')}</em></p>
-        )}
         <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {calculateWeight(backoff, liftKey)}</p>
       </div>
     );
@@ -226,8 +244,8 @@ const App: React.FC = () => {
                 </div>
               ))}
 
-              <h2>Main Movements</h2>
-              {mainFocusSet.map((lift) => renderLift(lift, lift))}
+              <h2>Main Movement</h2>
+              {renderLift(mainFocus, mainFocus)}
 
               <h2>Olympic Movement</h2>
               {renderLift(olympicFocus, olympicFocus)}
@@ -242,7 +260,7 @@ const App: React.FC = () => {
               <button type="button" className="submit-button" onClick={() => {
                 setCompletedDays(prev => {
                   const updated = [...prev];
-                  updated[currentDay % 7] = true;
+                  updated[currentDay] = true;
                   return updated;
                 });
                 setCurrentDay(prev => {
@@ -250,20 +268,23 @@ const App: React.FC = () => {
                   const newWeek = Math.floor(next / 7);
                   setTrainingWeek(newWeek);
 
-                  const newMain = getRandomItems(mainLifts.filter(l => l !== mainFocus), 1)[0];
-                  const newOly = getRandomItems(olympicLifts.filter(l => l !== olympicFocus), 1)[0];
+                  const previousMain = mainFocus;
+                  const previousOly = olympicFocus;
 
-                  const newMainSet = getRandomItems(mainLifts.filter(l => ![...mainFocusSet, newOly].includes(l)), 2);
-                  setMainFocusSet(newMainSet);
-                  setMainFocus(newMainSet[0]);
+                  const newMainOptions = mainLifts.filter(l => l !== previousMain);
+                  const newOlyOptions = olympicLifts.filter(l => l !== previousOly);
+
+                  const newMain = getRandomItems(newMainOptions, 1)[0];
+                  const newOly = getRandomItems(newOlyOptions, 1)[0];
+
+                  setMainFocus(newMain);
                   setOlympicFocus(newOly);
 
-                  localStorage.setItem('mainFocusSet', JSON.stringify(newMainSet));
                   localStorage.setItem('mainFocusWeek', newMain);
                   localStorage.setItem('olympicFocusWeek', newOly);
                   localStorage.setItem('trainingWeek', newWeek.toString());
-
                   localStorage.setItem('currentDay', next.toString());
+
                   return next;
                 });
               }}>
