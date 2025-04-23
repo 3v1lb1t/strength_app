@@ -11,25 +11,33 @@ const mainLifts = ['squat', 'bench', 'deadlift', 'press'];
 const olympicLifts = ['clean', 'snatch'];
 
 const weeks = [
-  { week: 1, type: 'base', percent: 0.7, reps: '4x6' },
-  { week: 2, type: 'base', percent: 0.75, reps: '4x5' },
-  { week: 3, type: 'base', percent: 0.8, reps: '4x4' },
+  { week: 1, type: 'base', percent: 0.7, reps: '3x6' },
+  { week: 2, type: 'base', percent: 0.75, reps: '3x5' },
+  { week: 3, type: 'base', percent: 0.8, reps: '3x4' },
   { week: 4, type: 'wave', percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
-  { week: 5, type: 'base', percent: 0.82, reps: '3x3' },
+  { week: 5, type: 'base', percent: 0.82, reps: '2x3' },
   { week: 6, type: 'wave', percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] },
-  { week: 7, type: 'base', percent: 0.85, reps: '3x2' },
+  { week: 7, type: 'base', percent: 0.85, reps: '2x2' },
   { week: 8, type: 'deload', percent: 0.6, reps: '3x5' },
 ];
 
 const App: React.FC = () => {
-  const [mainFocus, setMainFocus] = useState<string>(() => getRandomItems(mainLifts, 1)[0]);
-  const [olympicFocus, setOlympicFocus] = useState<string>(() => getRandomItems(olympicLifts, 1)[0]);
+  const savedMainFocus = localStorage.getItem('mainFocusWeek');
+  const savedOlyFocus = localStorage.getItem('olympicFocusWeek');
+  const savedWeekIndex = localStorage.getItem('trainingWeek');
+
+  const [mainFocus, setMainFocus] = useState<string>(() => savedMainFocus || getRandomItems(mainLifts, 1)[0]);
+  const [olympicFocus, setOlympicFocus] = useState<string>(() => savedOlyFocus || getRandomItems(olympicLifts, 1)[0]);
+  const [trainingWeek, setTrainingWeek] = useState<number>(() => savedWeekIndex ? parseInt(savedWeekIndex) : 0);
   const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
     const saved = localStorage.getItem('completedDays');
     return saved ? JSON.parse(saved) : Array(7).fill(false);
   });
 
-  const [currentDay, setCurrentDay] = useState<number>(0);
+  const [currentDay, setCurrentDay] = useState<number>(() => {
+    const savedDay = localStorage.getItem('currentDay');
+    return savedDay ? parseInt(savedDay) : 0;
+  });
 
   const savedOneRepMax = localStorage.getItem('oneRepMax');
   const [oneRepMax, setOneRepMax] = useState<Record<string, number>>(
@@ -40,7 +48,7 @@ const App: React.FC = () => {
   const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
 
   useEffect(() => {
-    fetch('/data/accessories.json')
+    fetch('./data/accessories.json')
       .then(res => res.json())
       .then(data => setAccessoryPool(data))
       .catch(err => console.error('Failed to load accessory data:', err));
@@ -69,7 +77,7 @@ const App: React.FC = () => {
   
   
   const todayLabel = `${mainFocus.charAt(0).toUpperCase() + mainFocus.slice(1)} Focus`;
-  const week = weeks[currentDay % weeks.length];
+  const week = weeks[trainingWeek % weeks.length];
 
   const calculateWeight = (percent: number, lift: string): string => `${Math.round(oneRepMax[lift] * percent)} lbs @ ${Math.round(percent * 100)}%`;
 
@@ -192,7 +200,24 @@ const App: React.FC = () => {
                   updated[currentDay % 7] = true;
                   return updated;
                 });
-                setCurrentDay(prev => prev + 1);
+                setCurrentDay(prev => {
+                  const next = prev + 1;
+                  const newWeek = Math.floor(next / 7);
+                  setTrainingWeek(newWeek);
+
+                  const newMain = getRandomItems(mainLifts.filter(l => l !== mainFocus), 1)[0];
+                  const newOly = getRandomItems(olympicLifts.filter(l => l !== olympicFocus), 1)[0];
+
+                  setMainFocus(newMain);
+                  setOlympicFocus(newOly);
+
+                  localStorage.setItem('mainFocusWeek', newMain);
+                  localStorage.setItem('olympicFocusWeek', newOly);
+                  localStorage.setItem('trainingWeek', newWeek.toString());
+
+                  localStorage.setItem('currentDay', next.toString());
+                  return next;
+                });
               }}>
                 Complete Day
               </button>

@@ -6,7 +6,7 @@
     },
     {
       "name": "Dumbbell Bench Press",
-      "description": "3x12 @ light to moderate",
+      "description": "3x10 @ light to moderate",
       "instructions": "Lower dumbbells to chest level and press them upward, keeping wrists straight and elbows at 45°."
     },
     {
@@ -36,7 +36,7 @@
     },
     {
       "name": "Russian Twists",
-      "description": "3x20",
+      "description": "3x10",
       "instructions": "Sit with heels raised, twist your torso to tap each side of your hips with a weight or hands."
     },
     {
@@ -115,19 +115,19 @@
       "name": "Snatch Balance",
       "description": "5x3 @ light weight",
       "instructions": "With the bar behind neck, quickly drop into a squat while pressing overhead into snatch position.",
-      "video":""
+      "video":"https://www.youtube.com/watch?v=8KKQTdnxWso"
     },
     {
       "name": "Push Jerk",
       "description": "3x3 @ moderate weight",
       "instructions": "Dip and drive the bar overhead, then quickly re-dip under it with locked arms and stand to finish.",
-      "video":""
+      "video":"https://www.youtube.com/watch?v=V-hKuAfWNUw"
     },
     {
       "name": "Split Jerk",
       "description": "3x3 @ moderate weight",
       "instructions": "Dip, drive and split one foot forward and the other back while punching the bar overhead.",
-      "video":""
+      "video":"https://www.youtube.com/watch?v=GUDkOtraHHY"
     },
     {
       "name": "L-Sit",
@@ -142,6 +142,12 @@
       "video":""
     },
     {
+      "name": "Snatch High Pulls",
+      "description": "3x5 @ light/moderate weight",
+      "instructions": "Perform the first half of a snatch - extend through hips, pull to chest then drop",
+      "video": "https://www.google.com/search?q=basic+instructions+for+snatch+high+pull&oq=basic+instructions+for+snatch+high+pull&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRiPAjIHCAIQIRiPAtIBCDU1MTdqMGo3qAIIsAIB8QXAMS5geHWdIg&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:9611a0a7,vid:9WRp0a5hcb0,st:16"
+    },
+    {
       "name": "Sumo Deadlift High Pulls",
       "description": "3x10 @ light weight",
       "instructions": "Start wide stance, pull barbell to chin after explosive hip extension. Keep elbows high.",
@@ -150,13 +156,13 @@
     {
       "name": "Tabata Burpees",
       "description": "3 rounds",
-      "instructions": "Perform 20s of burpees, 10s rest. Complete 8 rounds. Repeat for 3 total Tabata cycles.",
+      "instructions": "Perform Max Effort burpees 20s on, 10s rest. Complete 3 rounds. Repeat for 3 total Tabata cycles.",
       "video":""
     },
     {
       "name": "Tabata Pushups",
       "description": "3 rounds",
-      "instructions": "Perform push-ups 20s on, 10s off. 8 rounds per set. Repeat for 3 Tabata sets.",
+      "instructions": "Perform Max Effort push-ups 20s on, 10s rest. 3 rounds per set. Repeat for 3 Tabata sets.",
       "video":""
     }
   ]
