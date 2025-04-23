@@ -1,4 +1,4 @@
-// App.tsx (Full Updated Script)
+// App.tsx (Full Updated Script with fixed accessoryPool as React state)
 import React, { useEffect, useState } from 'react';
 import './App.css';
 
@@ -62,12 +62,120 @@ const generateWeeks = () => {
 const weeks = generateWeeks();
 
 const App: React.FC = () => {
+  
+
+  // Pre-generate weekly main/oly focus on first load
+  useEffect(() => {
+    const today = new Date();
+    const lastReset = localStorage.getItem('lastResetDate');
+    const currentWeek = today.getFullYear() + '-W' + String(Math.floor((today.getDate() - today.getDay()) / 7 + 1)).padStart(2, '0');
+
+    if (lastReset !== currentWeek) {
+      for (let i = 0; i < 7; i++) {
+        localStorage.removeItem(`mainLift_${i}`);
+        localStorage.removeItem(`olyLift_${i}`);
+        localStorage.removeItem(`accessoryWork_${i}`);
+      }
+      localStorage.removeItem('weekLiftsGenerated');
+      localStorage.removeItem('weekAccessoriesGenerated');
+      localStorage.removeItem('weekFocusGenerated');
+      localStorage.setItem('lastResetDate', currentWeek);
+    }
+
+
+    const liftsGenerated = localStorage.getItem('weekLiftsGenerated');
+    if (!liftsGenerated) {
+      const getNonRepeating = (list: string[], count: number) => {
+        const result = [];
+        let prev = '';
+        for (let i = 0; i < count; i++) {
+          const options = list.filter(l => l !== prev);
+          const choice = getRandomItems(options, 1)[0];
+          result.push(choice);
+          prev = choice;
+        }
+        return result;
+      };
+
+      const mainList = getNonRepeating(mainLifts, 7);
+      const olyList = getNonRepeating(olympicLifts, 7);
+
+      for (let i = 0; i < 7; i++) {
+        localStorage.setItem(`mainLift_${i}`, mainList[i]);
+        localStorage.setItem(`olyLift_${i}`, olyList[i]);
+      }
+
+      localStorage.setItem('weekLiftsGenerated', 'true');
+    }
+  }, []);
+
+  const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
+
+  // Fetch accessory pool data first
+  useEffect(() => {
+    fetch('./data/accessories.json')
+      .then(res => res.json())
+      .then(data => setAccessoryPool(data))
+      .catch(err => console.error('Failed to load accessory data:', err));
+  }, []);
+
+  // Pre-generate weekly accessory work on first load
+  useEffect(() => {
+    if (accessoryPool.length >= 21) {
+      const accessoriesGenerated = localStorage.getItem('weekAccessoriesGenerated');
+      if (!accessoriesGenerated) {
+        const result: Record<number, typeof accessoryPool> = {};
+        let prevNames: string[] = [];
+        for (let i = 0; i < 7; i++) {
+          const available = accessoryPool.filter(a => !prevNames.includes(a.name));
+          const selected = getRandomItems(available.length >= 3 ? available : accessoryPool, 3);
+          result[i] = selected;
+          localStorage.setItem(`accessoryWork_${i}`, JSON.stringify(selected));
+          prevNames = selected.map(a => a.name);
+        }
+        localStorage.setItem('weekAccessoriesGenerated', 'true');
+      }
+    }
+  }, [accessoryPool]);
+  // Pre-generate week focus data on first load
+  useEffect(() => {
+    const generated = localStorage.getItem('weekFocusGenerated');
+    if (!generated) {
+      const getNonRepeating = (list: string[], count: number) => {
+        const result = [];
+        let prev = '';
+        for (let i = 0; i < count; i++) {
+          const options = list.filter(l => l !== prev);
+          const choice = getRandomItems(options, 1)[0];
+          result.push(choice);
+          prev = choice;
+        }
+        return result;
+      };
+
+      const mainFocusList = getNonRepeating(mainLifts, 7);
+      const olympicFocusList = getNonRepeating(olympicLifts, 7);
+
+      for (let i = 0; i < 7; i++) {
+        localStorage.setItem(`mainLift_${i}`, mainFocusList[i]);
+        localStorage.setItem(`olyLift_${i}`, olympicFocusList[i]);
+      }
+
+      localStorage.setItem('weekFocusGenerated', 'true');
+    }
+  }, []);
   const savedMainFocus = localStorage.getItem('mainFocusWeek');
   const savedOlyFocus = localStorage.getItem('olympicFocusWeek');
   const savedWeekIndex = localStorage.getItem('trainingWeek');
 
-  const [mainFocus, setMainFocus] = useState<string>(() => savedMainFocus || getRandomItems(mainLifts, 1)[0]);
-  const [olympicFocus, setOlympicFocus] = useState<string>(() => savedOlyFocus || getRandomItems(olympicLifts, 1)[0]);
+  const [mainFocus, setMainFocus] = useState<string>(() => {
+    const current = parseInt(localStorage.getItem('currentDay') || '0');
+    return localStorage.getItem(`mainLift_${current}`) || mainLifts[0];
+  });
+  const [olympicFocus, setOlympicFocus] = useState<string>(() => {
+    const current = parseInt(localStorage.getItem('currentDay') || '0');
+    return localStorage.getItem(`olyLift_${current}`) || olympicLifts[0];
+  });
   const [trainingWeek, setTrainingWeek] = useState<number>(() => savedWeekIndex ? parseInt(savedWeekIndex) : 0);
   const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
     const saved = localStorage.getItem('completedDays');
@@ -85,7 +193,6 @@ const App: React.FC = () => {
       squat: 0, bench: 0, deadlift: 0, press: 0, clean: 0, snatch: 0,
     }
   );
-  const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
 
   useEffect(() => {
     fetch('./data/accessories.json')
@@ -107,12 +214,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (accessoryPool.length > 0) {
-      const prevAccessories = localStorage.getItem(`accessoryWork_${currentDay - 1}`);
-      const prevAccessoryNames = prevAccessories ? JSON.parse(prevAccessories).map((a: any) => a.name) : [];
-      const available = accessoryPool.filter(a => !prevAccessoryNames.includes(a.name));
-      const selected = getRandomItems(available.length >= 3 ? available : accessoryPool, 3);
-      setSelectedAccessories(selected);
-      localStorage.setItem(`accessoryWork_${currentDay}`, JSON.stringify(selected));
+      const currentAccessories = localStorage.getItem(`accessoryWork_${currentDay}`);
+      if (currentAccessories) {
+        setSelectedAccessories(JSON.parse(currentAccessories));
+      }
     }
   }, [accessoryPool, currentDay]);
   
