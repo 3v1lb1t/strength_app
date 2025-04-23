@@ -107,13 +107,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (accessoryPool.length > 0) {
-      const previous = currentDay > 0 ? selectedAccessories.map(a => a.name) : [];
-      const available = accessoryPool.filter(a => !previous.includes(a.name));
-      const accessories = getRandomItems(
-        available.length >= 3 ? available : accessoryPool,
-        3
-      );
-      setSelectedAccessories(accessories);
+      const prevAccessories = localStorage.getItem(`accessoryWork_${currentDay - 1}`);
+      const prevAccessoryNames = prevAccessories ? JSON.parse(prevAccessories).map((a: any) => a.name) : [];
+      const available = accessoryPool.filter(a => !prevAccessoryNames.includes(a.name));
+      const selected = getRandomItems(available.length >= 3 ? available : accessoryPool, 3);
+      setSelectedAccessories(selected);
+      localStorage.setItem(`accessoryWork_${currentDay}`, JSON.stringify(selected));
     }
   }, [accessoryPool, currentDay]);
   
@@ -268,11 +267,11 @@ const App: React.FC = () => {
                   const newWeek = Math.floor(next / 7);
                   setTrainingWeek(newWeek);
 
-                  const previousMain = mainFocus;
-                  const previousOly = olympicFocus;
+                  const prevMain = localStorage.getItem(`mainLift_${prev}`);
+                  const prevOly = localStorage.getItem(`olyLift_${prev}`);
 
-                  const newMainOptions = mainLifts.filter(l => l !== previousMain);
-                  const newOlyOptions = olympicLifts.filter(l => l !== previousOly);
+                  const newMainOptions = mainLifts.filter(l => l !== prevMain);
+                  const newOlyOptions = olympicLifts.filter(l => l !== prevOly);
 
                   const newMain = getRandomItems(newMainOptions, 1)[0];
                   const newOly = getRandomItems(newOlyOptions, 1)[0];
@@ -280,6 +279,8 @@ const App: React.FC = () => {
                   setMainFocus(newMain);
                   setOlympicFocus(newOly);
 
+                  localStorage.setItem(`mainLift_${next}`, newMain);
+                  localStorage.setItem(`olyLift_${next}`, newOly);
                   localStorage.setItem('mainFocusWeek', newMain);
                   localStorage.setItem('olympicFocusWeek', newOly);
                   localStorage.setItem('trainingWeek', newWeek.toString());
