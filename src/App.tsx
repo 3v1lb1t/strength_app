@@ -151,7 +151,14 @@ const App: React.FC = () => {
 
   const [mainFocus, setMainFocus] = useState<string>('');
   const [olympicFocus, setOlympicFocus] = useState<string>('');
-  const [trainingWeek, setTrainingWeek] = useState<number>(() => savedWeekIndex ? parseInt(savedWeekIndex) : 0);
+  const [trainingWeek, setTrainingWeek] = useState<number>(() => {
+    const savedWeekIndex = localStorage.getItem('trainingWeek');
+    return savedWeekIndex ? parseInt(savedWeekIndex) : 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('trainingWeek', trainingWeek.toString());
+  }, [trainingWeek]);
   const [completedDays, setCompletedDays] = useState<boolean[]>(() => {
     const saved = localStorage.getItem('completedDays');
     return saved ? JSON.parse(saved) : Array(7).fill(false);
@@ -375,6 +382,11 @@ const App: React.FC = () => {
                   const next = prev + 1;
                   const newWeek = Math.floor(next / 7);
                   setTrainingWeek(newWeek);
+                  if (newWeek !== trainingWeek) {
+                    const cleared = Array(7).fill(false);
+                    setCompletedDays(cleared);
+                    localStorage.setItem('completedDays', JSON.stringify(cleared));
+                  }
 
                   const prevMain = localStorage.getItem(`mainLift_${prev}`);
                   const prevOly = localStorage.getItem(`olyLift_${prev}`);
