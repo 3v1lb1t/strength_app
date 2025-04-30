@@ -125,6 +125,11 @@ const App: React.FC = () => {
   const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
   const [generalAccessories, setGeneralAccessories] = useState<typeof accessoryPool>([]);
   const [olympicAccessories, setOlympicAccessories] = useState<typeof accessoryPool>([]);
+  useEffect(() => {
+    if (generalAccessories.length && olympicAccessories.length) {
+      setAccessoryPool([...generalAccessories, ...olympicAccessories]);
+    }
+  }, [generalAccessories, olympicAccessories]);
 
   // Pre-generate weekly accessory work on first load
   useEffect(() => {

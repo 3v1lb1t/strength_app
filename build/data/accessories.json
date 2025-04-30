@@ -122,5 +122,11 @@
       "description": "3 rounds",
       "instructions": "Perform Max Effort push-ups 20s on, 10s rest. 3 rounds per set. Repeat for 3 Tabata sets.",
       "video":""
+    },
+    {
+      "name": "Tabata Plank",
+      "description": "6 rounds",
+      "instructions": "Perform Max Effort plank 20s on 10s rest. 6 rounds per set, Repeat for 3 Tabata sets",
+      "video":""
     }
   ]
