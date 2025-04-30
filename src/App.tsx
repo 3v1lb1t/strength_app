@@ -121,29 +121,32 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
-
   // Fetch accessory pool data first
-  
+  const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
+  const [generalAccessories, setGeneralAccessories] = useState<typeof accessoryPool>([]);
+  const [olympicAccessories, setOlympicAccessories] = useState<typeof accessoryPool>([]);
 
   // Pre-generate weekly accessory work on first load
   useEffect(() => {
-    if (accessoryPool.length >= 21) {
+    if (generalAccessories.length >= 10 && olympicAccessories.length >= 3) {
       const accessoriesGenerated = localStorage.getItem('weekAccessoriesGenerated');
       if (!accessoriesGenerated) {
-        const result: Record<number, typeof accessoryPool> = {};
+        const result: Record<number, (typeof generalAccessories[number])[]> = {};
         let prevNames: string[] = [];
         for (let i = 0; i < 7; i++) {
-          const available = accessoryPool.filter(a => !prevNames.includes(a.name));
-          const selected = getRandomItems(available.length >= 3 ? available : accessoryPool, 3);
-          result[i] = selected;
-          localStorage.setItem(`accessoryWork_${i}`, JSON.stringify(selected));
-          prevNames = selected.map(a => a.name);
+          const availableGeneral = generalAccessories.filter(a => !prevNames.includes(a.name));
+          const availableOly = olympicAccessories.filter(a => !prevNames.includes(a.name));
+          const selectedGeneral = getRandomItems(availableGeneral.length >= 2 ? availableGeneral : generalAccessories, 2);
+          const selectedOly = getRandomItems(availableOly.length >= 1 ? availableOly : olympicAccessories, 1);
+          const allSelected = [...selectedOly, ...selectedGeneral];
+          result[i] = allSelected;
+          localStorage.setItem(`accessoryWork_${i}`, JSON.stringify(allSelected));
+          prevNames = allSelected.map(a => a.name);
         }
         localStorage.setItem('weekAccessoriesGenerated', 'true');
       }
     }
-  }, [accessoryPool]);
+  }, [generalAccessories, olympicAccessories]);
   
   const savedMainFocus = localStorage.getItem('mainFocusWeek');
   const savedOlyFocus = localStorage.getItem('olympicFocusWeek');

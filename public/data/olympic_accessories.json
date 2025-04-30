@@ -1,0 +1,74 @@
+[
+    {
+      "name": "Snatch Balance",
+      "description": "Improves speed and stability under the bar",
+      "instructions": "3-4 sets of 3 reps @ 70-80% of snatch 1RM. Focus on quick drop and strong lockout.",
+      "video": "https://www.youtube.com/watch?v=8dZ8aHUIk6c"
+    },
+    {
+      "name": "Overhead Squat",
+      "description": "Builds snatch receiving position strength and mobility",
+      "instructions": "3 sets of 5 reps @ 60-75% of snatch. Keep torso upright and brace.",
+      "video": "https://www.youtube.com/watch?v=2jJ-8FAn6G8"
+    },
+    {
+      "name": "Clean Pull",
+      "description": "Develops leg drive and bar path for the clean",
+      "instructions": "4 sets of 3 reps @ 90-110% of clean. Stay over the bar and drive vertically.",
+      "video": "https://www.youtube.com/watch?v=a5fFdvFCYVc"
+    },
+    {
+      "name": "Snatch Pull",
+      "description": "Reinforces extension mechanics for snatch",
+      "instructions": "3-5 sets of 3 reps @ 90-100% of snatch. Full extension with elbows high.",
+      "video": "https://www.youtube.com/watch?v=avtWjJlOgJE"
+    },
+    {
+      "name": "Clean Front Squat",
+      "description": "Strengthens the clean receiving position",
+      "instructions": "3-4 sets of 3-5 reps @ 80-90% of front squat. Maintain clean rack position.",
+      "video": "https://www.youtube.com/watch?v=dQqApCGd5Ss"
+    },
+    {
+      "name": "Jerk Dip + Drive",
+      "description": "Improves dip and drive mechanics for the jerk",
+      "instructions": "3 sets of 5 reps @ 60-70% of jerk. Controlled dip and aggressive drive.",
+      "video": "https://www.youtube.com/watch?v=8vWa67e0x3k"
+    },
+    {
+      "name": "Tall Snatch",
+      "description": "Trains turnover speed and footwork",
+      "instructions": "3 sets of 3 reps with empty bar or light weight. Pull under aggressively.",
+      "video": "https://www.youtube.com/watch?v=HTy9E-yPjko"
+    },
+    {
+      "name": "Snatch High Pull",
+      "description": "Develops explosive extension and upper pull",
+      "instructions": "3-4 sets of 3 reps @ 80-90% of snatch. Elbows above bar, strong finish.",
+      "video": "https://www.youtube.com/watch?v=byf3hykKOSg"
+    },
+    {
+        "name": "Push Jerk",
+        "description": "3x3 @ moderate weight",
+        "instructions": "Dip and drive the bar overhead, then quickly re-dip under it with locked arms and stand to finish.",
+        "video":"https://www.youtube.com/watch?v=V-hKuAfWNUw"
+      },
+      {
+        "name": "Split Jerk",
+        "description": "3x3 @ moderate weight",
+        "instructions": "Dip, drive and split one foot forward and the other back while punching the bar overhead.",
+        "video":"https://www.youtube.com/watch?v=GUDkOtraHHY"
+      },
+      {
+        "name": "Push Press",
+        "description": "3x8 @ moderate weight",
+        "instructions": "Dip slightly and drive the bar overhead with leg drive. Lockout with arms straight overhead.",
+        "video":""
+    },
+    {
+      "name": "Behind Neck Push Press",
+      "description": "3x8 @ moderate weight",
+      "instructions": "Dip and drive the bar from behind the neck. Ensure mobility and control to avoid shoulder strain.",
+      "video":""
+    }
+  ]

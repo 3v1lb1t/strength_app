@@ -100,52 +100,10 @@
       "video":""
     },
     {
-      "name": "Push Press",
-      "description": "3x8 @ moderate weight",
-      "instructions": "Dip slightly and drive the bar overhead with leg drive. Lockout with arms straight overhead.",
-      "video":""
-    },
-    {
-      "name": "Behind Neck Push Press",
-      "description": "3x8 @ moderate weight",
-      "instructions": "Dip and drive the bar from behind the neck. Ensure mobility and control to avoid shoulder strain.",
-      "video":""
-    },
-    {
-      "name": "Snatch Balance",
-      "description": "5x3 @ light weight",
-      "instructions": "With the bar behind neck, quickly drop into a squat while pressing overhead into snatch position.",
-      "video":"https://www.youtube.com/watch?v=8KKQTdnxWso"
-    },
-    {
-      "name": "Push Jerk",
-      "description": "3x3 @ moderate weight",
-      "instructions": "Dip and drive the bar overhead, then quickly re-dip under it with locked arms and stand to finish.",
-      "video":"https://www.youtube.com/watch?v=V-hKuAfWNUw"
-    },
-    {
-      "name": "Split Jerk",
-      "description": "3x3 @ moderate weight",
-      "instructions": "Dip, drive and split one foot forward and the other back while punching the bar overhead.",
-      "video":"https://www.youtube.com/watch?v=GUDkOtraHHY"
-    },
-    {
       "name": "L-Sit",
       "description": "3x10sec",
       "instructions": "Support yourself on parallettes or dip bars. Hold legs straight in front at hip height.",
       "video":""
-    },
-    {
-      "name": "Clean Pulls",
-      "description": "3x10 @ light/moderate weight",
-      "instructions": "Perform the first half of a clean—extend through hips, pull to shrug, no arm bend.",
-      "video":""
-    },
-    {
-      "name": "Snatch High Pulls",
-      "description": "3x5 @ light/moderate weight",
-      "instructions": "Perform the first half of a snatch - extend through hips, pull to chest then drop",
-      "video": "https://www.google.com/search?q=basic+instructions+for+snatch+high+pull&oq=basic+instructions+for+snatch+high+pull&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRiPAjIHCAIQIRiPAtIBCDU1MTdqMGo3qAIIsAIB8QXAMS5geHWdIg&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:9611a0a7,vid:9WRp0a5hcb0,st:16"
     },
     {
       "name": "Sumo Deadlift High Pulls",
@@ -166,4 +124,3 @@
       "video":""
     }
   ]
-  
