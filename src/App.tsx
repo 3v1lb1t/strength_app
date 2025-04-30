@@ -12,48 +12,60 @@ const olympicLifts = ['clean', 'snatch'];
 
 const generateWeeks = () => {
   const waveTemplate = [
-    { percents: [0.75, 0.77, 0.84, 0.87, 0.8, 0.75], reps: ['1x7', '1x5', '1x3', '1x3', '1x5', '1x7'] },
-    { percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x7', '1x5', '1x3', '1x2', '1x4', '1x6'] }
+    { percents: [0.77, 0.8, 0.86, 0.9, 0.82, 0.77], reps: ['1x6', '1x5', '1x3', '1x2', '1x4', '1x6'] },
+    { percents: [0.78, 0.81, 0.87, 0.91, 0.83, 0.78], reps: ['1x6', '1x5', '1x3', '1x2', '1x4', '1x6'] }
   ];
 
-  const baseWeeks = [
-    { percent: 0.7, reps: '3x6' },
-    { percent: 0.75, reps: '3x5' },
-    { percent: 0.8, reps: '3x4' },
-    { percent: 0.82, reps: '2x3' },
-    { percent: 0.85, reps: '2x2' },
-    { percent: 0.9, reps: '3x2' },
-    { percent: 0.95, reps: '3x2' }
+  const hypertrophy = [
+    { percent: 0.6, reps: '3x12' },
+    { percent: 0.65, reps: '4x10' },
+    { percent: 0.7, reps: '4x8' },
+    { percent: 0.72, reps: '4x8' }
+  ];
+
+  const strength = [
+    { percent: 0.75, reps: '4x6' },
+    { percent: 0.8, reps: '4x5' },
+    { percent: 0.82, reps: '3x4' },
+    { percent: 0.85, reps: '3x4' }
+  ];
+
+  const peaking = [
+    { percent: 0.88, reps: '3x3' },
+    { percent: 0.91, reps: '3x2' },
+    { percent: 0.94, reps: '2x2' },
+    { percent: 0.97, reps: '2x1' }
   ];
 
   const usedWaveLifts = new Set();
   const result = [];
 
-  for (let i = 0; i < 9; i++) {
-    if (i === 8) {
-      result.push({ week: 9, type: 'test', percent: 1.0, reps: '1x1' });
-      continue;
-    }
-    if (i === 7) {
-      result.push({ week: 8, type: 'deload', percent: 0.6, reps: '3x5' });
+  for (let i = 0; i < 12; i++) {
+    // hypertrophy phase: weeks 1-4
+    if (i < 4) {
+      result.push({ week: i + 1, type: 'hypertrophy', ...hypertrophy[i] });
       continue;
     }
 
-    const isWaveWeek = i > 4 && Math.random() < 0.4 && result[i - 1]?.type !== 'wave';
-
-    if (isWaveWeek) {
-      const availableWaveLifts = mainLifts.filter(l => !usedWaveLifts.has(l));
-      if (availableWaveLifts.length > 0) {
-        const wave = waveTemplate[Math.floor(Math.random() * waveTemplate.length)];
+    // strength phase: weeks 5-8 (include 1 wave week per main lift only once)
+    if (i >= 4 && i < 8) {
+      const isWaveWeek = Math.random() < 0.4 && result[i - 1]?.type !== 'wave' && usedWaveLifts.size < mainLifts.length;
+      if (isWaveWeek) {
+        const availableWaveLifts = mainLifts.filter(l => !usedWaveLifts.has(l));
         const assignedLift = getRandomItems(availableWaveLifts, 1)[0];
+        const wave = waveTemplate[Math.floor(Math.random() * waveTemplate.length)];
         usedWaveLifts.add(assignedLift);
         result.push({ week: i + 1, type: 'wave', assignedLift, ...wave });
         continue;
       }
+      result.push({ week: i + 1, type: 'strength', ...strength[i - 4] });
+      continue;
     }
 
-    const base = baseWeeks[Math.min(i, baseWeeks.length - 1)];
-    result.push({ week: i + 1, type: 'base', ...base });
+    // peaking phase: weeks 9-12
+    if (i >= 8 && i < 12) {
+      result.push({ week: i + 1, type: 'peaking', ...peaking[i - 8] });
+    }
   }
 
   return result;
@@ -112,12 +124,7 @@ const App: React.FC = () => {
   const [accessoryPool, setAccessoryPool] = useState<{ name: string; description: string; instructions: string; video?: string }[]>([]);
 
   // Fetch accessory pool data first
-  useEffect(() => {
-    fetch('./data/accessories.json')
-      .then(res => res.json())
-      .then(data => setAccessoryPool(data))
-      .catch(err => console.error('Failed to load accessory data:', err));
-  }, []);
+  
 
   // Pre-generate weekly accessory work on first load
   useEffect(() => {
@@ -137,33 +144,7 @@ const App: React.FC = () => {
       }
     }
   }, [accessoryPool]);
-  // Pre-generate week focus data on first load
-  useEffect(() => {
-    const generated = localStorage.getItem('weekFocusGenerated');
-    if (!generated) {
-      const getNonRepeating = (list: string[], count: number) => {
-        const result = [];
-        let prev = '';
-        for (let i = 0; i < count; i++) {
-          const options = list.filter(l => l !== prev);
-          const choice = getRandomItems(options, 1)[0];
-          result.push(choice);
-          prev = choice;
-        }
-        return result;
-      };
-
-      const mainFocusList = getNonRepeating(mainLifts, 7);
-      const olympicFocusList = getNonRepeating(olympicLifts, 7);
-
-      for (let i = 0; i < 7; i++) {
-        localStorage.setItem(`mainLift_${i}`, mainFocusList[i]);
-        localStorage.setItem(`olyLift_${i}`, olympicFocusList[i]);
-      }
-
-      localStorage.setItem('weekFocusGenerated', 'true');
-    }
-  }, []);
+  
   const savedMainFocus = localStorage.getItem('mainFocusWeek');
   const savedOlyFocus = localStorage.getItem('olympicFocusWeek');
   const savedWeekIndex = localStorage.getItem('trainingWeek');
@@ -250,15 +231,36 @@ const App: React.FC = () => {
         </div>
       );
     }
-    if (typeof week.percent !== 'number' || typeof week.reps !== 'string') return null;
-    const backoff = week.percent - 0.05;
-    return (
-      <div className="form-group">
-        <label>{name} – {week.reps} @ {Math.round(week.percent * 100)}%</label>
-        <p>Top Set: {calculateWeight(week.percent, liftKey)}</p>
-        <p>Backoff Sets: 2x{week.reps.split('x')[1]} @ {calculateWeight(backoff, liftKey)}</p>
-      </div>
-    );
+
+    if (week.type === 'wave') {
+      const waveWeek = week as { percents: number[]; reps: string[] };
+      return (
+        <div className="form-group">
+          <label>{name} – Wave Week</label>
+          <ul>
+            {waveWeek.percents.map((p, i) => (
+              <li key={i}>
+                {waveWeek.reps[i]} @ {calculateWeight(p, liftKey)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    if ('percent' in week && 'reps' in week) {
+      const basicWeek = week as { percent: number; reps: string };
+      const backoff = basicWeek.percent - 0.05;
+      return (
+        <div className="form-group">
+          <label>{name} – {basicWeek.reps} @ {Math.round(basicWeek.percent * 100)}%</label>
+          <p>Top Set: {calculateWeight(basicWeek.percent, liftKey)}</p>
+          <p>Backoff Sets: 2x{basicWeek.reps.split('x')[1]} @ {calculateWeight(backoff, liftKey)}</p>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -311,6 +313,7 @@ const App: React.FC = () => {
           </div>
 
           <h1 className="app-title">Strength App: Day {currentDay + 1} – {todayLabel}</h1>
+<p className="phase-label">Current Phase: {week.type.charAt(0).toUpperCase() + week.type.slice(1)}</p>
 
           
 
